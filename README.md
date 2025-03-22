@@ -30,18 +30,21 @@ Proyek ini adalah backend untuk sistem penerimaan siswa madrasah. Dibangun mengg
    git checkout -b <nama-branch>
    ```
 4. Lakukan perubahan pada kode sesuai kebutuhan.
-5. Commit perubahan Anda:
+`
+git add .
+`
+6. Commit perubahan Anda:
    ```bash
-   git add .
+   
    git commit -m "Deskripsi perubahan"
    ```
-6. Push branch Anda ke repository:
+7. Push branch Anda ke repository:
    ```bash
    git push origin <nama-branch>
    ```
-7. Buat Pull Request (PR) di GitHub dan tunggu hingga PR Anda direview dan di-merge oleh kolaborator lain.
+8. Buat Pull Request (PR) di GitHub dan tunggu hingga PR Anda direview dan di-merge oleh kolaborator lain.
 
-8. Jika terjadi non-fast forward saat ingin push, coba gunakan 
+9. Jika terjadi non-fast forward saat ingin push, coba gunakan 
 ```bash
 git pull origin main --rebash
 ```
