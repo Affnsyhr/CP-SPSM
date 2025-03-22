@@ -30,9 +30,9 @@ Proyek ini adalah backend untuk sistem penerimaan siswa madrasah. Dibangun mengg
    git checkout -b <nama-branch>
    ```
 4. Lakukan perubahan pada kode sesuai kebutuhan.
-`
+```
 git add .
-`
+```
 6. Commit perubahan Anda:
    ```bash
    
