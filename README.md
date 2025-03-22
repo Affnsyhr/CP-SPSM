@@ -23,7 +23,7 @@ Proyek ini adalah backend untuk sistem penerimaan siswa madrasah. Dibangun mengg
 1. Pastikan Anda memiliki akses ke repository proyek ini di GitHub.
 2. Clone repository ke komputer lokal Anda:
    ```bash
-   git clone <repository-url>
+   git clone "https://github.com/Affnsyhr/CP-SPSM.git"
    ```
 3. Buat branch baru untuk fitur atau perubahan yang ingin Anda tambahkan:
    ```bash
