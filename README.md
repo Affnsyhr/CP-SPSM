@@ -40,3 +40,12 @@ Proyek ini adalah backend untuk sistem penerimaan siswa madrasah. Dibangun mengg
    git push origin <nama-branch>
    ```
 7. Buat Pull Request (PR) di GitHub dan tunggu hingga PR Anda direview dan di-merge oleh kolaborator lain.
+
+8. Jika terjadi non-fast forward saat ingin push, coba gunakan 
+```bash
+git pull origin main --rebash
+```
+9. kemudian push  kembali !! happy coding 😊
+```
+git push origin main
+``` 
