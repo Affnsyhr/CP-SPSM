@@ -14,7 +14,7 @@ const Dashboard = () => {
 
     return (
         <div>
-            {user ? <h1>Welcome, {user.name}</h1> : <p>Loading...</p>}
+            {user ? <h1>Test Test, {user.name}</h1> : <p>Loading...</p>}
         </div>
     );
 };
