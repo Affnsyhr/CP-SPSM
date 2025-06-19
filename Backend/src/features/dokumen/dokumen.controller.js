@@ -1,5 +1,8 @@
 const DokumenService = require('./dokumen.service');
 
+// Tambahkan array jenis dokumen yang diizinkan
+const allowedJenisDokumen = ['nilai_rapor', 'akte', 'foto_3x4', 'kk'];
+
 const uploadDokumen = async (req, res, next) => {
   try {
     const { pendaftaran_id, jenis_dokumen } = req.body;
