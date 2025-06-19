@@ -33,6 +33,15 @@ const getRiwayatPendaftaran = async (req, res, next) => {
   }
 };
 
+const getAllPendaftaran = async (req, res, next) => {
+  try {
+    const data = await PendaftaranService.getAllPendaftaran();
+    res.status(200).json({ status: 'success', data });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   daftarSiswa,
   getRiwayatPendaftaran,

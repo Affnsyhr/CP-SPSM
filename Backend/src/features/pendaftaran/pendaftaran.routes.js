@@ -14,5 +14,10 @@ router.use(authorizeRoles(ROLES.ORANG_TUA));
 router.post('/', daftarSiswa);
 // Endpoint riwayat pendaftaran siswa milik orang tua
 router.get('/', getRiwayatPendaftaran);
+// Endpoint untuk admin_tu: melihat semua pendaftaran
+router.get('/all', authMiddleware, authorizeRoles(ROLES.ADMIN_TU), require('./pendaftaran.controller').getAllPendaftaran);
+// Endpoint untuk admin_tu: update status pendaftaran
+router.put('/:id/status', authMiddleware, authorizeRoles(ROLES.ADMIN_TU), require('./pendaftaran.controller').updateStatusPendaftaran);
+// ...existing code...
 
 module.exports = router;
