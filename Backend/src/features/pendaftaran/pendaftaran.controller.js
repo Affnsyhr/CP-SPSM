@@ -42,7 +42,20 @@ const getAllPendaftaran = async (req, res, next) => {
   }
 };
 
+const updateStatusPendaftaran = async (req, res, next) => {
+  try {
+    const { status_pendaftaran } = req.body;
+    const { id } = req.params;
+    const updated = await PendaftaranService.updateStatusPendaftaran(id, status_pendaftaran);
+    res.status(200).json({ status: 'success', message: 'Status pendaftaran diperbarui', data: updated });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   daftarSiswa,
   getRiwayatPendaftaran,
+  getAllPendaftaran,
+  updateStatusPendaftaran
 };
