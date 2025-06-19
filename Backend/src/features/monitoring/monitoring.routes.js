@@ -22,5 +22,8 @@ router.get('/dokumen', MonitoringController.statistikDokumen);
 // (Opsional) Statistik program dan tahun ajaran aktif
 router.get('/program', MonitoringController.statistikProgram);
 router.get('/tahunajaran', MonitoringController.statistikTahunAjaran);
-
+// ...existing code...
+// Monitoring summary (semua statistik dalam satu response)
+router.get('/summary', MonitoringController.monitoringSummary);
+// ...existing code...
 module.exports = router;
