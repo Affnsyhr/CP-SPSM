@@ -37,8 +37,26 @@ const getDokumenByPendaftaran = async (req, res, next) => {
     next(error);
   }
 };
+const verifikasiDokumen = async (req, res, next) => {
+  try {
+    const { dokumen_id } = req.params;
+    let { status_verifikasi, catatan } = req.body;
+    const verified_by = req.user.user_id;
+    const admin_name = req.user.username;
+
+    if (catatan) {
+      catatan = `[Verifikator: ${admin_name}] ${catatan}`;
+    } else {
+      catatan = `[Verifikator: ${admin_name}]`;
+    }
+
+    const dokumen = await DokumenService.verifikasiDokumen({ dokumen_id, status_verifikasi, catatan, verified_by });
+    res.json({ status: 'success', message: 'Status dokumen diperbarui', data: dokumen });
+  } catch (err) { next(err); }
+};
 
 module.exports = {
   uploadDokumen,
   getDokumenByPendaftaran,
+  verifikasiDokumen,
 };

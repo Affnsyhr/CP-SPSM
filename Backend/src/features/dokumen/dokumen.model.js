@@ -18,7 +18,30 @@ const getDokumenByPendaftaran = async (pendaftaran_id) => {
   return result.rows;
 };
 
+const updateStatusVerifikasi = async ({ dokumen_id, status_verifikasi, catatan, verified_by }) => {
+  const result = await db.query(
+    `UPDATE dokumen_pendaftaran
+     SET status_verifikasi = $1, catatan = $2, verified_by = $3, tanggal_verifikasi = NOW()
+     WHERE dokumen_id = $4
+     RETURNING *`,
+    [status_verifikasi, catatan, verified_by, dokumen_id]
+  );
+  return result.rows[0];
+};
+const getSiswaOrangTuaByDokumenId = async (dokumen_id) => {
+  const result = await db.query(
+    `SELECT s.siswa_id, s.orang_tua_id
+     FROM dokumen_pendaftaran d
+     JOIN siswa s ON d.siswa_id = s.siswa_id
+     WHERE d.dokumen_id = $1`,
+    [dokumen_id]
+  );
+  return result.rows[0];
+};
+
 module.exports = {
   createDokumen,
   getDokumenByPendaftaran,
+  updateStatusVerifikasi,
+  getSiswaOrangTuaByDokumenId,
 };

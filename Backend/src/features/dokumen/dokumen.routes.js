@@ -33,5 +33,11 @@ router.post('/', upload.single('file'), uploadDokumen);
 
 // Lihat semua dokumen untuk 1 pendaftaran (GET /api/dokumen/:pendaftaran_id)
 router.get('/:pendaftaran_id', getDokumenByPendaftaran);
+router.patch(
+  '/:dokumen_id/verifikasi',
+  authMiddleware,
+  authorizeRoles(ROLES.ADMIN_TU),
+  require('./dokumen.controller').verifikasiDokumen
+);
 
 module.exports = router;
