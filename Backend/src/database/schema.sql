@@ -19,7 +19,7 @@ CREATE TABLE users (
 COMMENT ON COLUMN users.role_id IS 'orang_tua';
 
 -- Table: user_profile
-CREATE TABLE user_profile (
+CREATE TABLE orang_tua (
   user_id INTEGER PRIMARY KEY REFERENCES users(user_id),
   nama_lengkap VARCHAR(100) NOT NULL,
   nik VARCHAR(20) UNIQUE,
