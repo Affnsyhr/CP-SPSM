@@ -8,10 +8,9 @@ const { ROLES } = require('../../constants/roles');
 
 const router = express.Router();
 
-// Konfigurasi penyimpanan file
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'uploads/dokumen/'); // Pastikan folder ini ada
+    cb(null, 'uploads/dokumen/');
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
@@ -21,21 +20,30 @@ const storage = multer.diskStorage({
 
 const upload = multer({ 
   storage,
-  limits: { fileSize: 2 * 1024 * 1024 } // 2MB
+  limits: { fileSize: 2 * 1024 * 1024 }
 });
 
-// Middleware: hanya orang tua yang boleh upload
+// Hanya auth global
 router.use(authMiddleware);
-router.use(authorizeRoles(ROLES.ORANG_TUA));
 
-// Upload dokumen (POST /api/dokumen)
-router.post('/', upload.single('file'), uploadDokumen);
+// Upload dokumen (POST /api/dokumen) - hanya ORANG_TUA
+router.post(
+  '/',
+  authorizeRoles(ROLES.ORANG_TUA),
+  upload.single('file'),
+  uploadDokumen
+);
 
-// Lihat semua dokumen untuk 1 pendaftaran (GET /api/dokumen/:pendaftaran_id)
-router.get('/:pendaftaran_id', getDokumenByPendaftaran);
+// Lihat semua dokumen untuk 1 pendaftaran (GET /api/dokumen/:pendaftaran_id) - hanya ORANG_TUA
+router.get(
+  '/:pendaftaran_id',
+  authorizeRoles(ROLES.ORANG_TUA),
+  getDokumenByPendaftaran
+);
+
+// Verifikasi dokumen (PATCH /api/dokumen/:dokumen_id/verifikasi) - hanya ADMIN_TU
 router.patch(
   '/:dokumen_id/verifikasi',
-  authMiddleware,
   authorizeRoles(ROLES.ADMIN_TU),
   require('./dokumen.controller').verifikasiDokumen
 );

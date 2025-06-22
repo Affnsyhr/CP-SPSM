@@ -3,12 +3,12 @@ const PendaftaranModel = require('./pendaftaran.model');
 const { sendEmail } = require('../../utils/emailService');
 const db = require('../../config/db');
 
-const buatPendaftaran = async ({ siswa_id, tahun_ajaran_id, program_id, catatan }) => {
-  if (!siswa_id || !tahun_ajaran_id || !program_id) {
+const buatPendaftaran = async ({ siswa_id, tahun_ajaran_id, program_id, catatan, orang_tua_id }) => {
+  if (!siswa_id || !tahun_ajaran_id || !program_id || !orang_tua_id) {
     throw new BadRequestError('Semua field wajib diisi');
   }
   // Validasi tambahan bisa ditambahkan di sini (misal: cek kuota, cek status, dsb)
-  return await PendaftaranModel.createPendaftaran({ siswa_id, tahun_ajaran_id, program_id, catatan });
+  return await PendaftaranModel.createPendaftaran({ siswa_id, tahun_ajaran_id, program_id, catatan, orang_tua_id});
 };
 
 const riwayatPendaftaranOrangTua = async (user_id) => {

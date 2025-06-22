@@ -2,11 +2,11 @@ const { BadRequestError } = require('../../utils/errors');
 const DokumenModel = require('./dokumen.model');
 const NotifikasiService = require('../notifikasi/notifikasi.service');
 
-const uploadDokumen = async ({ pendaftaran_id, jenis_dokumen, nama_file, path_file }) => {
-  if (!pendaftaran_id || !jenis_dokumen || !nama_file || !path_file) {
+const uploadDokumen = async ({ pendaftaran_id, jenis_dokumen, nama_file }) => {
+  if (!pendaftaran_id || !jenis_dokumen || !nama_file ) {
     throw new BadRequestError('Semua field wajib diisi');
   }
-  return await DokumenModel.createDokumen({ pendaftaran_id, jenis_dokumen, nama_file, path_file });
+  return await DokumenModel.createDokumen({ pendaftaran_id, jenis_dokumen, nama_file });
 };
 
 const getDokumenByPendaftaran = async (pendaftaran_id) => {

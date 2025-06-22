@@ -1,5 +1,7 @@
 const PendaftaranService = require('./pendaftaran.service');
 const db = require('../../config/db');
+const { logAktivitas } = require('../log/aktivitasLog.service');
+
 
 const daftarSiswa = async (req, res, next) => {
   try {
@@ -73,12 +75,23 @@ const updateStatusPendaftaran = async (req, res, next) => {
   try {
     const { status_pendaftaran } = req.body;
     const { id } = req.params;
+    const admin_id = req.user.user_id;
+    const ip_address = req.ip;
+
     const updated = await PendaftaranService.updateStatusPendaftaran(id, status_pendaftaran);
+     await logAktivitas({
+      user_id: admin_id,
+      aktivitas: `Update status pendaftaran #${id} menjadi "${status_pendaftaran}"`,
+      ip_address
+    });
+    
     res.status(200).json({ status: 'success', message: 'Status pendaftaran diperbarui', data: updated });
   } catch (error) {
     next(error);
   }
 };
+
+
 
 module.exports = {
   daftarSiswa,

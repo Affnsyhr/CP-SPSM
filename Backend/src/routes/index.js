@@ -5,7 +5,10 @@ const pendaftaranRoutes = require('../features/pendaftaran/pendaftaran.routes');
 const dokumenRoutes = require('../features/dokumen/dokumen.routes');
 const monitoringRoutes = require('../features/monitoring/monitoring.routes');
 const orangtuaDashboardRoutes = require('../features/orangtua/dashboard.routes');
+const aktivitasLogRoutes = require('../features/log/aktivitasLog.routes');
+const siswaRoutes = require('../features/siswa/siswa.routes');
 const router = express.Router();
+
 // API Routes
 router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
@@ -13,6 +16,8 @@ router.use('/pendaftaran', pendaftaranRoutes);
 router.use('/dokumen', dokumenRoutes);
 router.use('/monitoring', monitoringRoutes);
 router.use('/orangtua/dashboard', orangtuaDashboardRoutes);
+router.use('/log', aktivitasLogRoutes);
+router.use('/siswa', siswaRoutes);
 // Health check endpoint
 router.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'Server is running' });

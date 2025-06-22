@@ -1,13 +1,21 @@
 const db = require('../../config/db');
 
-const createDokumen = async ({ pendaftaran_id, jenis_dokumen, nama_file, path_file }) => {
+const createDokumen = async ({ siswa_id, jenis_dokumen, nama_file }) => {
   const result = await db.query(
-    `INSERT INTO dokumen (pendaftaran_id, jenis_dokumen, nama_file, path_file)
-     VALUES ($1, $2, $3, $4)
+    `INSERT INTO dokumen_pendaftaran (siswa_id, jenis_dokumen, nama_file,  tanggal_upload)
+     VALUES ($1, $2, $3,  NOW())
      RETURNING *`,
-    [pendaftaran_id, jenis_dokumen, nama_file, path_file]
+    [siswa_id, jenis_dokumen, nama_file]
   );
   return result.rows[0];
+};
+
+const getDokumenBySiswa = async (siswa_id) => {
+  const result = await db.query(
+    `SELECT * FROM dokumen_pendaftaran WHERE siswa_id = $1 ORDER BY tanggal_upload DESC`,
+    [siswa_id]
+  );
+  return result.rows;
 };
 
 const getDokumenByPendaftaran = async (pendaftaran_id) => {
@@ -41,6 +49,7 @@ const getSiswaOrangTuaByDokumenId = async (dokumen_id) => {
 
 module.exports = {
   createDokumen,
+  getDokumenBySiswa,
   getDokumenByPendaftaran,
   updateStatusVerifikasi,
   getSiswaOrangTuaByDokumenId,

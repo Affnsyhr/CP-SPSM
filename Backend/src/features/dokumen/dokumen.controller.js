@@ -1,4 +1,5 @@
 const DokumenService = require('./dokumen.service');
+const { logAktivitas } = require('../log/aktivitasLog.service');
 
 // Tambahkan array jenis dokumen yang diizinkan
 const allowedJenisDokumen = ['nilai_rapor', 'akte', 'foto_3x4', 'kk'];
@@ -12,13 +13,12 @@ const uploadDokumen = async (req, res, next) => {
     const dokumen = await DokumenService.uploadDokumen({
       pendaftaran_id,
       jenis_dokumen,
-      nama_file: req.file.originalname,
-      path_file: req.file.path,
+      nama_file: req.file.filename,
     });
     res.status(201).json({
       status: 'success',
       message: 'Dokumen berhasil diupload',
-      data: dokumen,
+      // data: dokumen,
     });
   } catch (error) {
     next(error);
@@ -43,6 +43,7 @@ const verifikasiDokumen = async (req, res, next) => {
     let { status_verifikasi, catatan } = req.body;
     const verified_by = req.user.user_id;
     const admin_name = req.user.username;
+    const ip_address = req.ip;
 
     if (catatan) {
       catatan = `[Verifikator: ${admin_name}] ${catatan}`;
@@ -51,9 +52,18 @@ const verifikasiDokumen = async (req, res, next) => {
     }
 
     const dokumen = await DokumenService.verifikasiDokumen({ dokumen_id, status_verifikasi, catatan, verified_by });
+
+    // Log aktivitas admin
+    await logAktivitas({
+      user_id: verified_by,
+      aktivitas: `Verifikasi dokumen #${dokumen_id} menjadi "${status_verifikasi}"`,
+      ip_address
+    });
+
     res.json({ status: 'success', message: 'Status dokumen diperbarui', data: dokumen });
   } catch (err) { next(err); }
 };
+
 
 module.exports = {
   uploadDokumen,
