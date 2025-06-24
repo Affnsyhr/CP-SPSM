@@ -75,11 +75,41 @@ const statistikTahunAjaran = async (req, res, next) => {
   }
 };
 
+const getPendaftarPerTahunAjaran = async (req, res, next) => {
+  try {
+    const data = await MonitoringService.getPendaftarPerTahunAjaran();
+    res.json({ status: 'success', data });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const getPendaftarPerProgramStatus = async (req, res, next) => {
+  try {
+    const data = await MonitoringService.getPendaftarPerProgramStatus();
+    res.json({ status: 'success', data });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const getTotalSiswa = async (req, res, next) => {
+  try {
+    const data = await MonitoringService.getTotalSiswa();
+    res.json({ status: 'success', data });
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   monitoringSummary,
   statistikPendaftaran,
   statistikSiswa,
   statistikDokumen,
   statistikProgram,
-  statistikTahunAjaran
+  statistikTahunAjaran,
+  getPendaftarPerTahunAjaran,
+  getPendaftarPerProgramStatus,
+  getTotalSiswa,
 };

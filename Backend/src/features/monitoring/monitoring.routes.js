@@ -1,8 +1,8 @@
 const express = require('express');
-const { ROLES } = require('../../constants/roles');
+const { getPendaftarPerTahunAjaran, getPendaftarPerProgramStatus, getTotalSiswa } = require('./monitoring.controller');
 const authMiddleware = require('../../middlewares/authMiddleware');
 const authorizeRoles = require('../../middlewares/authorizeRoles');
-const MonitoringController = require('./monitoring.controller');
+const { ROLES } = require('../../constants/roles');
 
 const router = express.Router();
 
@@ -10,20 +10,13 @@ const router = express.Router();
 router.use(authMiddleware);
 router.use(authorizeRoles(ROLES.KEPALA_SEKOLAH));
 
-// Statistik jumlah pendaftaran per status
-router.get('/pendaftaran', MonitoringController.statistikPendaftaran);
+// Statistik pendaftar per tahun ajaran
+router.get('/pendaftar-per-tahun', getPendaftarPerTahunAjaran);
 
-// Statistik jumlah siswa baru per tahun ajaran
-router.get('/siswa', MonitoringController.statistikSiswa);
+// Statistik pendaftar per program dan status
+router.get('/pendaftar-per-program', getPendaftarPerProgramStatus);
 
-// Statistik dokumen masuk
-router.get('/dokumen', MonitoringController.statistikDokumen);
+// Statistik total siswa
+router.get('/total-siswa', getTotalSiswa);
 
-// (Opsional) Statistik program dan tahun ajaran aktif
-router.get('/program', MonitoringController.statistikProgram);
-router.get('/tahunajaran', MonitoringController.statistikTahunAjaran);
-// ...existing code...
-// Monitoring summary (semua statistik dalam satu response)
-router.get('/summary', MonitoringController.monitoringSummary);
-// ...existing code...
 module.exports = router;

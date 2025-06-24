@@ -55,16 +55,16 @@ COMMENT ON COLUMN program_sekolah.nama_program IS 'Program khusus madrasah SMP';
 COMMENT ON COLUMN program_sekolah.kuota_siswa IS 'Jumlah maksimal siswa per angkatan';
 COMMENT ON COLUMN program_sekolah.jenis_pendaftar IS 'Jenis pendaftar yang diterima program';
 
--- Table: periode_pendaftaran
-CREATE TYPE status_periode_enum AS ENUM ('aktif', 'nonaktif');
-CREATE TABLE periode_pendaftaran (
-  periode_id SERIAL PRIMARY KEY,
-  nama_periode VARCHAR(50) NOT NULL,
-  tanggal_mulai DATE NOT NULL,
-  tanggal_berakhir DATE NOT NULL,
-  status status_periode_enum DEFAULT 'nonaktif',
-  created_by INTEGER REFERENCES users(user_id)
-);
+-- -- Table: periode_pendaftaran
+-- CREATE TYPE status_periode_enum AS ENUM ('aktif', 'nonaktif');
+-- CREATE TABLE periode_pendaftaran (
+--   periode_id SERIAL PRIMARY KEY,
+--   nama_periode VARCHAR(50) NOT NULL,
+--   tanggal_mulai DATE NOT NULL,
+--   tanggal_berakhir DATE NOT NULL,
+--   status status_periode_enum DEFAULT 'nonaktif',
+--   created_by INTEGER REFERENCES users(user_id)
+-- );
 
 -- Table: dokumen_pendaftaran
 CREATE TYPE jenis_dokumen_enum AS ENUM ('akta_kelahiran', 'kartu_keluarga', 'ijazah', 'foto', 'lainnya');
