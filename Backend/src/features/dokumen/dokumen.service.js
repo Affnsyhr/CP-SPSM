@@ -1,12 +1,22 @@
-const { BadRequestError } = require('../../utils/errors');
+const { BadRequestError, NotFoundError } = require('../../utils/errors');
 const DokumenModel = require('./dokumen.model');
 const NotifikasiService = require('../notifikasi/notifikasi.service');
+const PendaftaranModel = require('../pendaftaran/pendaftaran.model');
 
 const uploadDokumen = async ({ pendaftaran_id, jenis_dokumen, nama_file }) => {
-  if (!pendaftaran_id || !jenis_dokumen || !nama_file ) {
+  if (!pendaftaran_id || !jenis_dokumen || !nama_file) {
     throw new BadRequestError('Semua field wajib diisi');
   }
-  return await DokumenModel.createDokumen({ pendaftaran_id, jenis_dokumen, nama_file });
+
+  // 1. Ambil data pendaftaran untuk mendapatkan siswa_id
+  const pendaftaran = await PendaftaranModel.getPendaftaranById(pendaftaran_id);
+  if (!pendaftaran) {
+    throw new NotFoundError('Data pendaftaran tidak ditemukan');
+  }
+  const siswa_id = pendaftaran.siswa_id;
+
+  // 2. Simpan dokumen dengan siswa_id yang sudah ditemukan
+  return await DokumenModel.createDokumen({ siswa_id, jenis_dokumen, nama_file });
 };
 
 const getDokumenByPendaftaran = async (pendaftaran_id) => {

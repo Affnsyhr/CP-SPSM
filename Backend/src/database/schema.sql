@@ -96,14 +96,15 @@ CREATE TABLE data_pendaftaran (
 );
 
 -- Table: tahun_ajaran
-CREATE TYPE status_tahun_ajaran_enum AS ENUM ('aktif', 'selesai', 'persiapan');
 CREATE TABLE tahun_ajaran (
   id_tahunajaran SERIAL PRIMARY KEY,
   tahun_ajaran VARCHAR(20) NOT NULL UNIQUE,
   tanggal_mulai DATE NOT NULL,
   tanggal_berakhir DATE NOT NULL,
-  status status_tahun_ajaran_enum DEFAULT 'persiapan'
+  status status_tahun_ajaran_enum DEFAULT 'persiapan',
+  created_by INTEGER REFERENCES users(user_id)
 );
+
 COMMENT ON COLUMN tahun_ajaran.tahun_ajaran IS 'Format tahun ajaran seperti "2025/2026" atau "2025-2026"';
 COMMENT ON COLUMN tahun_ajaran.tanggal_mulai IS 'Tanggal mulai tahun ajaran';
 COMMENT ON COLUMN tahun_ajaran.tanggal_berakhir IS 'Tanggal berakhir tahun ajaran';
@@ -111,12 +112,10 @@ COMMENT ON COLUMN tahun_ajaran.tanggal_berakhir IS 'Tanggal berakhir tahun ajara
 -- Table: timeline_pendaftaran
 CREATE TABLE timeline_pendaftaran (
   timeline_id SERIAL PRIMARY KEY,
-  periode_id INTEGER REFERENCES periode_pendaftaran(periode_id),
   id_tahunajaran INTEGER REFERENCES tahun_ajaran(id_tahunajaran),
   nama_kegiatan VARCHAR(100) NOT NULL,
   tanggal_mulai TIMESTAMP NOT NULL,
-  tanggal_selesai TIMESTAMP NOT NULL,
-  deskripsi TEXT
+  tanggal_selesai TIMESTAMP NOT NULL
 );
 
 -- Table: notifikasi

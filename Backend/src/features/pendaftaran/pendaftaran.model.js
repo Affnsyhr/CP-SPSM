@@ -32,7 +32,33 @@ const getPendaftaranByOrangTua = async (user_id) => {
   return result.rows;
 };
 
+const getPendaftaranById = async (pendaftaran_id) => {
+  const result = await db.query(
+    'SELECT * FROM data_pendaftaran WHERE pendaftaran_id = $1',
+    [pendaftaran_id]
+  );
+  return result.rows[0];
+}
+
+const getAllPendaftaran = async () => {
+  const result = await db.query(
+    `SELECT * FROM data_pendaftaran ORDER BY tanggal_daftar DESC`
+  );
+  return result.rows;
+}
+
+const updateStatus = async (pendaftaran_id, status_pendaftaran) => {
+  const result = await db.query(
+    `UPDATE data_pendaftaran SET status_pendaftaran = $1 WHERE pendaftaran_id = $2 RETURNING *`,
+    [status_pendaftaran, pendaftaran_id]
+  );
+  return result.rows[0];
+}
+
 module.exports = {
   createPendaftaran,
   getPendaftaranByOrangTua,
+  getPendaftaranById,
+  getAllPendaftaran,
+  updateStatus
 };

@@ -1,8 +1,8 @@
 const DokumenService = require('./dokumen.service');
 const { logAktivitas } = require('../log/aktivitasLog.service');
 
-// Tambahkan array jenis dokumen yang diizinkan
-const allowedJenisDokumen = ['nilai_rapor', 'akte', 'foto_3x4', 'kk'];
+// Sinkronkan dengan ENUM di schema.sql
+const allowedJenisDokumen = ['akta_kelahiran', 'kartu_keluarga', 'ijazah', 'foto', 'lainnya'];
 
 const uploadDokumen = async (req, res, next) => {
   try {

@@ -20,7 +20,11 @@ const getDokumenBySiswa = async (siswa_id) => {
 
 const getDokumenByPendaftaran = async (pendaftaran_id) => {
   const result = await db.query(
-    `SELECT * FROM dokumen WHERE pendaftaran_id = $1 ORDER BY created_at DESC`,
+    `SELECT dp.*
+     FROM dokumen_pendaftaran dp
+     JOIN data_pendaftaran p ON dp.siswa_id = p.siswa_id
+     WHERE p.pendaftaran_id = $1
+     ORDER BY dp.tanggal_upload DESC`,
     [pendaftaran_id]
   );
   return result.rows;

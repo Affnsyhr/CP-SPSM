@@ -18,7 +18,16 @@ const getAllSiswaByOrangTua = async (orang_tua_id) => {
   return result.rows;
 };
 
+const getSiswaById = async (siswa_id) => {
+  const result = await db.query(
+    'SELECT * FROM siswa WHERE siswa_id = $1',
+    [siswa_id]
+  );
+  return result.rows[0];
+}
+
 module.exports = {
   createSiswa,
   getAllSiswaByOrangTua,
+  getSiswaById
 };

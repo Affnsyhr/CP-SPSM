@@ -1,5 +1,6 @@
 const { BadRequestError } = require('../../utils/errors');
 const PendaftaranModel = require('./pendaftaran.model');
+const SiswaModel = require('../siswa/siswa.model');
 const { sendEmail } = require('../../utils/emailService');
 const db = require('../../config/db');
 
@@ -10,6 +11,10 @@ const buatPendaftaran = async ({ siswa_id, tahun_ajaran_id, program_id, catatan,
   // Validasi tambahan bisa ditambahkan di sini (misal: cek kuota, cek status, dsb)
   return await PendaftaranModel.createPendaftaran({ siswa_id, tahun_ajaran_id, program_id, catatan, orang_tua_id});
 };
+
+const getAllPendaftaran = async () => {
+  return await PendaftaranModel.getAllPendaftaran();
+}
 
 const riwayatPendaftaranOrangTua = async (user_id) => {
   return await PendaftaranModel.getPendaftaranByOrangTua(user_id);
@@ -34,14 +39,24 @@ const getDetailPendaftaran = async ({ siswa_id, program_id, orang_tua_id }) => {
 };
 
 const updateStatusPendaftaran = async (id, status_pendaftaran) => {
-  // ...update status di database...
+  let updatedPendaftaran = await PendaftaranModel.updateStatus(id, status_pendaftaran);
+
+  // Jika data lama tidak memiliki orang_tua_id, cari secara manual
+  if (updatedPendaftaran && !updatedPendaftaran.orang_tua_id && updatedPendaftaran.siswa_id) {
+    const siswa = await SiswaModel.getSiswaById(updatedPendaftaran.siswa_id);
+    if (siswa) {
+      updatedPendaftaran.orang_tua_id = siswa.orang_tua_id;
+    }
+  }
+
+  // Kirim email jika lulus
   if (status_pendaftaran === 'lulus') {
     // Ambil data orang tua dan anak
     const result = await db.query(`
-      SELECT u.email, up.nama_lengkap AS nama_ortu, s.nama_lengkap AS nama_anak
+      SELECT u.email, ot.nama_lengkap AS nama_ortu, s.nama_lengkap AS nama_anak
       FROM data_pendaftaran dp
-      JOIN user_profile up ON dp.orang_tua_id = up.user_id
-      JOIN users u ON up.user_id = u.user_id
+      JOIN orang_tua ot ON dp.orang_tua_id = ot.user_id
+      JOIN users u ON ot.user_id = u.user_id
       JOIN siswa s ON dp.siswa_id = s.siswa_id
       WHERE dp.pendaftaran_id = $1
     `, [id]);
@@ -54,12 +69,13 @@ const updateStatusPendaftaran = async (id, status_pendaftaran) => {
       });
     }
   }
-  // ...
+  return updatedPendaftaran;
 };
 
 module.exports = {
   buatPendaftaran,
+  getAllPendaftaran,
   riwayatPendaftaranOrangTua,
-  updateStatusPendaftaran,
-  getDetailPendaftaran
+  getDetailPendaftaran,
+  updateStatusPendaftaran
 };
