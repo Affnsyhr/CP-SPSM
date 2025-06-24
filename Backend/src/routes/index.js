@@ -7,6 +7,7 @@ const monitoringRoutes = require('../features/monitoring/monitoring.routes');
 const orangtuaDashboardRoutes = require('../features/orangtua/dashboard.routes');
 const aktivitasLogRoutes = require('../features/log/aktivitasLog.routes');
 const siswaRoutes = require('../features/siswa/siswa.routes');
+const programRoutes = require('../features/program/program.routes');
 const router = express.Router();
 
 // API Routes
@@ -18,6 +19,7 @@ router.use('/monitoring', monitoringRoutes);
 router.use('/orangtua/dashboard', orangtuaDashboardRoutes);
 router.use('/log', aktivitasLogRoutes);
 router.use('/siswa', siswaRoutes);
+router.use('/programs', programRoutes);
 // Health check endpoint
 router.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'Server is running' });
