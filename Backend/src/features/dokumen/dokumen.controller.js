@@ -64,9 +64,35 @@ const verifikasiDokumen = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
+const updateDokumenFile = async (req, res, next) => {
+  try {
+    const { dokumen_id } = req.params;
+    if (!req.file) {
+      return res.status(400).json({ status: 'error', message: 'File dokumen wajib diupload' });
+    }
+    const orang_tua_id = req.user.user_id;
+    const updated = await DokumenService.updateDokumenFile({ dokumen_id, orang_tua_id, nama_file: req.file.filename });
+    res.json({ status: 'success', message: 'File dokumen berhasil diganti', data: updated });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const deleteDokumen = async (req, res, next) => {
+  try {
+    const { dokumen_id } = req.params;
+    const orang_tua_id = req.user.user_id;
+    const deleted = await DokumenService.deleteDokumen({ dokumen_id, orang_tua_id });
+    res.json({ status: 'success', message: 'Dokumen berhasil dihapus', data: deleted });
+  } catch (err) {
+    next(err);
+  }
+};
 
 module.exports = {
   uploadDokumen,
   getDokumenByPendaftaran,
   verifikasiDokumen,
+  updateDokumenFile,
+  deleteDokumen,
 };

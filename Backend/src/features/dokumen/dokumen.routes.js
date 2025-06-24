@@ -1,7 +1,7 @@
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
-const { uploadDokumen, getDokumenByPendaftaran } = require('./dokumen.controller');
+const { uploadDokumen, getDokumenByPendaftaran, updateDokumenFile, deleteDokumen } = require('./dokumen.controller');
 const authMiddleware = require('../../middlewares/authMiddleware');
 const authorizeRoles = require('../../middlewares/authorizeRoles');
 const { ROLES } = require('../../constants/roles');
@@ -46,6 +46,21 @@ router.patch(
   '/:dokumen_id/verifikasi',
   authorizeRoles(ROLES.ADMIN_TU),
   require('./dokumen.controller').verifikasiDokumen
+);
+
+// Update dokumen file (PUT /api/dokumen/:dokumen_id) - hanya ORANG_TUA
+router.put(
+  '/:dokumen_id',
+  authorizeRoles(ROLES.ORANG_TUA),
+  upload.single('file'),
+  updateDokumenFile
+);
+
+// Delete dokumen (DELETE /api/dokumen/:dokumen_id) - hanya ORANG_TUA
+router.delete(
+  '/:dokumen_id',
+  authorizeRoles(ROLES.ORANG_TUA),
+  deleteDokumen
 );
 
 module.exports = router;

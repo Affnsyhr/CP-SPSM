@@ -40,6 +40,7 @@ const updateStatusVerifikasi = async ({ dokumen_id, status_verifikasi, catatan, 
   );
   return result.rows[0];
 };
+
 const getSiswaOrangTuaByDokumenId = async (dokumen_id) => {
   const result = await db.query(
     `SELECT s.siswa_id, s.orang_tua_id
@@ -51,10 +52,28 @@ const getSiswaOrangTuaByDokumenId = async (dokumen_id) => {
   return result.rows[0];
 };
 
+const updateDokumenFile = async (dokumen_id, nama_file) => {
+  const result = await db.query(
+    `UPDATE dokumen_pendaftaran SET nama_file = $1, tanggal_upload = NOW() WHERE dokumen_id = $2 AND status_verifikasi = 'menunggu' RETURNING *`,
+    [nama_file, dokumen_id]
+  );
+  return result.rows[0];
+};
+
+const deleteDokumen = async (dokumen_id) => {
+  const result = await db.query(
+    `DELETE FROM dokumen_pendaftaran WHERE dokumen_id = $1 AND status_verifikasi = 'menunggu' RETURNING *`,
+    [dokumen_id]
+  );
+  return result.rows[0];
+};
+
 module.exports = {
   createDokumen,
   getDokumenBySiswa,
   getDokumenByPendaftaran,
   updateStatusVerifikasi,
   getSiswaOrangTuaByDokumenId,
+  updateDokumenFile,
+  deleteDokumen,
 };
