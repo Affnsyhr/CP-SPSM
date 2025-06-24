@@ -1,4 +1,4 @@
-const { BadRequestError } = require('../../utils/errors');
+const { BadRequestError, NotFoundError } = require('../../utils/errors');
 const PendaftaranModel = require('./pendaftaran.model');
 const SiswaModel = require('../siswa/siswa.model');
 const { sendEmail } = require('../../utils/emailService');
@@ -72,10 +72,25 @@ const updateStatusPendaftaran = async (id, status_pendaftaran) => {
   return updatedPendaftaran;
 };
 
+const deletePendaftaran = async ({ pendaftaran_id, orang_tua_id }) => {
+  // Cek pendaftaran milik siapa dan status
+  const pendaftaran = await PendaftaranModel.getPendaftaranById(pendaftaran_id);
+  if (!pendaftaran || pendaftaran.orang_tua_id !== orang_tua_id) {
+    throw new NotFoundError('Pendaftaran tidak ditemukan atau bukan milik Anda');
+  }
+  if (pendaftaran.status_pendaftaran !== 'proses') {
+    throw new BadRequestError('Pendaftaran tidak bisa dihapus karena sudah diproses');
+  }
+  const deleted = await PendaftaranModel.deletePendaftaran(pendaftaran_id);
+  if (!deleted) throw new BadRequestError('Pendaftaran gagal dihapus');
+  return deleted;
+};
+
 module.exports = {
   buatPendaftaran,
   getAllPendaftaran,
   riwayatPendaftaranOrangTua,
   getDetailPendaftaran,
-  updateStatusPendaftaran
+  updateStatusPendaftaran,
+  deletePendaftaran,
 };

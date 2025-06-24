@@ -91,11 +91,21 @@ const updateStatusPendaftaran = async (req, res, next) => {
   }
 };
 
-
+const deletePendaftaran = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const orang_tua_id = req.user.user_id;
+    const deleted = await PendaftaranService.deletePendaftaran({ pendaftaran_id: id, orang_tua_id });
+    res.json({ status: 'success', message: 'Pendaftaran berhasil dihapus', data: deleted });
+  } catch (err) {
+    next(err);
+  }
+};
 
 module.exports = {
   daftarSiswa,
   getRiwayatPendaftaran,
   getAllPendaftaran,
-  updateStatusPendaftaran
+  updateStatusPendaftaran,
+  deletePendaftaran,
 };

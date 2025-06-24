@@ -1,5 +1,5 @@
 const express = require('express');
-const { daftarSiswa, getRiwayatPendaftaran, getAllPendaftaran, updateStatusPendaftaran } = require('./pendaftaran.controller');
+const { daftarSiswa, getRiwayatPendaftaran, getAllPendaftaran, updateStatusPendaftaran, deletePendaftaran } = require('./pendaftaran.controller');
 const authMiddleware = require('../../middlewares/authMiddleware');
 const authorizeRoles = require('../../middlewares/authorizeRoles');
 const { ROLES } = require('../../constants/roles');
@@ -20,5 +20,8 @@ router.get('/all', authorizeRoles(ROLES.ADMIN_TU), getAllPendaftaran);
 
 // Endpoint untuk admin_tu: update status pendaftaran (Hanya Admin TU)
 router.put('/:id/status', authorizeRoles(ROLES.ADMIN_TU), updateStatusPendaftaran);
+
+// Endpoint hapus pendaftaran siswa (Hanya Orang Tua, status proses)
+router.delete('/:id', authorizeRoles(ROLES.ORANG_TUA), deletePendaftaran);
 
 module.exports = router;

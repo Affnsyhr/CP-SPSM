@@ -55,10 +55,19 @@ const updateStatus = async (pendaftaran_id, status_pendaftaran) => {
   return result.rows[0];
 }
 
+const deletePendaftaran = async (pendaftaran_id) => {
+  const result = await db.query(
+    `DELETE FROM data_pendaftaran WHERE pendaftaran_id = $1 AND status_pendaftaran = 'proses' RETURNING *`,
+    [pendaftaran_id]
+  );
+  return result.rows[0];
+};
+
 module.exports = {
   createPendaftaran,
   getPendaftaranByOrangTua,
   getPendaftaranById,
   getAllPendaftaran,
-  updateStatus
+  updateStatus,
+  deletePendaftaran,
 };
