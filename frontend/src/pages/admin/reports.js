@@ -12,6 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../../components/ui/dialog";
+import { Sidebar } from "../../components/layout/sidebar";
 
 export default function AdminPeriod() {
   const [isAddingPeriod, setIsAddingPeriod] = useState(false);
@@ -138,196 +139,201 @@ export default function AdminPeriod() {
   };
 
   return (
-    <div className="p-6">
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Manajemen Periode Pendaftaran</h1>
-          <p className="text-muted-foreground">Atur periode pendaftaran siswa baru</p>
-        </div>
-        <Button asChild variant="outline">
-          <Link to="/admin/dashboard" className="flex items-center gap-2">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="h-4 w-4"
-            >
-              <path d="m12 19-7-7 7-7"></path>
-              <path d="M19 12H5"></path>
-            </svg>
-            Kembali ke Dashboard
-          </Link>
-        </Button>
-      </div>
-
-      <div className="mb-6">
-        <Button onClick={() => setIsAddingPeriod(true)}>
-          Tambah Periode Pendaftaran
-        </Button>
-      </div>
-
-      {(isAddingPeriod || isEditingPeriod) && (
-        <div className="mb-8 rounded-lg border p-6">
-          <h2 className="text-xl font-semibold mb-4">
-            {isEditingPeriod ? "Edit Periode Pendaftaran" : "Tambah Periode Pendaftaran Baru"}
-          </h2>
-          <div className="grid gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="periodName">Nama Periode</Label>
-              <Input
-                id="periodName"
-                placeholder="Contoh: Pendaftaran Tahun Ajaran 2024/2025"
-                value={newPeriod.name}
-                onChange={(e) => setNewPeriod({ ...newPeriod, name: e.target.value })}
-              />
+    <div className="flex min-h-screen">
+      <Sidebar />
+      <div className="flex-1 flex flex-col">
+        <div className="p-6">
+          <div className="mb-6 flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold">Manajemen Periode Pendaftaran</h1>
+              <p className="text-muted-foreground">Atur periode pendaftaran siswa baru</p>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="startDate">Tanggal Mulai</Label>
-                <Input
-                  id="startDate"
-                  type="date"
-                  value={newPeriod.startDate}
-                  onChange={(e) => setNewPeriod({ ...newPeriod, startDate: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="endDate">Tanggal Selesai</Label>
-                <Input
-                  id="endDate"
-                  type="date"
-                  value={newPeriod.endDate}
-                  onChange={(e) => setNewPeriod({ ...newPeriod, endDate: e.target.value })}
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="academicYear">Tahun Ajaran</Label>
-              <Input
-                id="academicYear"
-                placeholder="Contoh: 2024/2025"
-                value={newPeriod.academicYear}
-                onChange={(e) => setNewPeriod({ ...newPeriod, academicYear: e.target.value })}
-              />
-            </div>
-            <div className="flex justify-end gap-4">
-              <Button variant="outline" onClick={handleCancel}>
-                Batal
-              </Button>
-              <Button onClick={isEditingPeriod ? handleEditSave : handleAddPeriod}>
-                {isEditingPeriod ? "Simpan Perubahan" : "Simpan"}
-              </Button>
-            </div>
+            <Button asChild variant="outline">
+              <Link to="/admin/dashboard" className="flex items-center gap-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-4 w-4"
+                >
+                  <path d="m12 19-7-7 7-7"></path>
+                  <path d="M19 12H5"></path>
+                </svg>
+                Kembali ke Dashboard
+              </Link>
+            </Button>
           </div>
-        </div>
-      )}
 
-      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Hapus Periode Pendaftaran</DialogTitle>
-            <DialogDescription>
-              Apakah Anda yakin ingin menghapus periode pendaftaran ini? Tindakan ini tidak dapat dibatalkan.
-            </DialogDescription>
-          </DialogHeader>
-          {periodToDelete && (
-            <div className="py-4">
-              <div className="space-y-2">
-                <p className="text-sm font-medium">Detail Periode:</p>
-                <div className="rounded-lg border p-3 space-y-2">
-                  <p className="text-sm">
-                    <span className="font-medium">Nama:</span> {periodToDelete.name}
-                  </p>
-                  <p className="text-sm">
-                    <span className="font-medium">Tahun Ajaran:</span> {periodToDelete.academicYear}
-                  </p>
-                  <p className="text-sm">
-                    <span className="font-medium">Periode:</span>{" "}
-                    {new Date(periodToDelete.startDate).toLocaleDateString("id-ID")} -{" "}
-                    {new Date(periodToDelete.endDate).toLocaleDateString("id-ID")}
-                  </p>
+          <div className="mb-6">
+            <Button onClick={() => setIsAddingPeriod(true)}>
+              Tambah Periode Pendaftaran
+            </Button>
+          </div>
+
+          {(isAddingPeriod || isEditingPeriod) && (
+            <div className="mb-8 rounded-lg border p-6">
+              <h2 className="text-xl font-semibold mb-4">
+                {isEditingPeriod ? "Edit Periode Pendaftaran" : "Tambah Periode Pendaftaran Baru"}
+              </h2>
+              <div className="grid gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="periodName">Nama Periode</Label>
+                  <Input
+                    id="periodName"
+                    placeholder="Contoh: Pendaftaran Tahun Ajaran 2024/2025"
+                    value={newPeriod.name}
+                    onChange={(e) => setNewPeriod({ ...newPeriod, name: e.target.value })}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="startDate">Tanggal Mulai</Label>
+                    <Input
+                      id="startDate"
+                      type="date"
+                      value={newPeriod.startDate}
+                      onChange={(e) => setNewPeriod({ ...newPeriod, startDate: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="endDate">Tanggal Selesai</Label>
+                    <Input
+                      id="endDate"
+                      type="date"
+                      value={newPeriod.endDate}
+                      onChange={(e) => setNewPeriod({ ...newPeriod, endDate: e.target.value })}
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="academicYear">Tahun Ajaran</Label>
+                  <Input
+                    id="academicYear"
+                    placeholder="Contoh: 2024/2025"
+                    value={newPeriod.academicYear}
+                    onChange={(e) => setNewPeriod({ ...newPeriod, academicYear: e.target.value })}
+                  />
+                </div>
+                <div className="flex justify-end gap-4">
+                  <Button variant="outline" onClick={handleCancel}>
+                    Batal
+                  </Button>
+                  <Button onClick={isEditingPeriod ? handleEditSave : handleAddPeriod}>
+                    {isEditingPeriod ? "Simpan Perubahan" : "Simpan"}
+                  </Button>
                 </div>
               </div>
             </div>
           )}
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setDeleteDialogOpen(false);
-                setPeriodToDelete(null);
-              }}
-            >
-              Batal
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={handleDeleteConfirm}
-            >
-              Hapus
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
-      <div className="space-y-4">
-        <h2 className="text-xl font-semibold">Daftar Periode Pendaftaran</h2>
-        <div className="rounded-lg border">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b bg-muted/50">
-                <th className="p-4 text-left font-medium">Nama Periode</th>
-                <th className="p-4 text-left font-medium">Tahun Ajaran</th>
-                <th className="p-4 text-left font-medium">Tanggal Mulai</th>
-                <th className="p-4 text-left font-medium">Tanggal Selesai</th>
-                <th className="p-4 text-left font-medium">Status</th>
-                <th className="p-4 text-left font-medium">Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {registrationPeriods.map((period) => (
-                <tr key={period.id} className="border-b">
-                  <td className="p-4">{period.name}</td>
-                  <td className="p-4">{period.academicYear}</td>
-                  <td className="p-4">{new Date(period.startDate).toLocaleDateString('id-ID')}</td>
-                  <td className="p-4">{new Date(period.endDate).toLocaleDateString('id-ID')}</td>
-                  <td className="p-4">
-                    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                      period.status === 'active' 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-gray-100 text-gray-800'
-                    }`}>
-                      {period.status === 'active' ? 'Aktif' : 'Selesai'}
-                    </span>
-                  </td>
-                  <td className="p-4">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="mr-2"
-                      onClick={() => handleEditClick(period)}
-                    >
-                      Edit
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="text-red-600 hover:text-red-700"
-                      onClick={() => handleDeleteClick(period)}
-                    >
-                      Hapus
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Hapus Periode Pendaftaran</DialogTitle>
+                <DialogDescription>
+                  Apakah Anda yakin ingin menghapus periode pendaftaran ini? Tindakan ini tidak dapat dibatalkan.
+                </DialogDescription>
+              </DialogHeader>
+              {periodToDelete && (
+                <div className="py-4">
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium">Detail Periode:</p>
+                    <div className="rounded-lg border p-3 space-y-2">
+                      <p className="text-sm">
+                        <span className="font-medium">Nama:</span> {periodToDelete.name}
+                      </p>
+                      <p className="text-sm">
+                        <span className="font-medium">Tahun Ajaran:</span> {periodToDelete.academicYear}
+                      </p>
+                      <p className="text-sm">
+                        <span className="font-medium">Periode:</span>{" "}
+                        {new Date(periodToDelete.startDate).toLocaleDateString("id-ID")} -{" "}
+                        {new Date(periodToDelete.endDate).toLocaleDateString("id-ID")}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setDeleteDialogOpen(false);
+                    setPeriodToDelete(null);
+                  }}
+                >
+                  Batal
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={handleDeleteConfirm}
+                >
+                  Hapus
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          <div className="space-y-4">
+            <h2 className="text-xl font-semibold">Daftar Periode Pendaftaran</h2>
+            <div className="rounded-lg border">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b bg-muted/50">
+                    <th className="p-4 text-left font-medium">Nama Periode</th>
+                    <th className="p-4 text-left font-medium">Tahun Ajaran</th>
+                    <th className="p-4 text-left font-medium">Tanggal Mulai</th>
+                    <th className="p-4 text-left font-medium">Tanggal Selesai</th>
+                    <th className="p-4 text-left font-medium">Status</th>
+                    <th className="p-4 text-left font-medium">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {registrationPeriods.map((period) => (
+                    <tr key={period.id} className="border-b">
+                      <td className="p-4">{period.name}</td>
+                      <td className="p-4">{period.academicYear}</td>
+                      <td className="p-4">{new Date(period.startDate).toLocaleDateString('id-ID')}</td>
+                      <td className="p-4">{new Date(period.endDate).toLocaleDateString('id-ID')}</td>
+                      <td className="p-4">
+                        <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                          period.status === 'active' 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-gray-100 text-gray-800'
+                        }`}>
+                          {period.status === 'active' ? 'Aktif' : 'Selesai'}
+                        </span>
+                      </td>
+                      <td className="p-4">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="mr-2"
+                          onClick={() => handleEditClick(period)}
+                        >
+                          Edit
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="text-red-600 hover:text-red-700"
+                          onClick={() => handleDeleteClick(period)}
+                        >
+                          Hapus
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
     </div>
