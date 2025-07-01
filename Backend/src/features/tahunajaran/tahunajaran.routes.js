@@ -7,15 +7,13 @@ const { ROLES } = require('../../constants/roles');
 const router = express.Router();
 
 router.use(authMiddleware);
-router.use(authorizeRoles(ROLES.SUPERADMIN, ROLES.ADMIN_TU));
 
-// Create
-router.post('/', createTahunAjaran);
-// Read all
+// GET tahun ajaran bisa diakses semua user login
 router.get('/', getAllTahunAjaran);
-// Update
-router.put('/:id', updateTahunAjaran);
-// Delete
-router.delete('/:id', deleteTahunAjaran);
+
+// Endpoint lain hanya untuk SUPERADMIN dan ADMIN_TU
+router.post('/', authorizeRoles(ROLES.SUPERADMIN, ROLES.ADMIN_TU), createTahunAjaran);
+router.put('/:id', authorizeRoles(ROLES.SUPERADMIN, ROLES.ADMIN_TU), updateTahunAjaran);
+router.delete('/:id', authorizeRoles(ROLES.SUPERADMIN, ROLES.ADMIN_TU), deleteTahunAjaran);
 
 module.exports = router; 
