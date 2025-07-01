@@ -5,7 +5,7 @@ const { logAktivitas } = require('../log/aktivitasLog.service');
 
 const daftarSiswa = async (req, res, next) => {
   try {
-    const { siswa_id, tahun_ajaran_id, program_id, catatan } = req.body;
+    const { siswa_id, tahun_ajaran_id, program_id, catatan, program_jalur_id } = req.body;
     const orang_tua_id = req.user.user_id;
 
     // Validasi siswa_id milik orang tua yang login
@@ -26,7 +26,8 @@ const daftarSiswa = async (req, res, next) => {
       tahun_ajaran_id,
       program_id,
       catatan,
-      orang_tua_id
+      orang_tua_id,
+      program_jalur_id
     });
 
     // Ambil detail lengkap untuk response

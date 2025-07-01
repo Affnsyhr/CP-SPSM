@@ -3,13 +3,14 @@ const PendaftaranModel = require('./pendaftaran.model');
 const SiswaModel = require('../siswa/siswa.model');
 const { sendEmail } = require('../../utils/emailService');
 const db = require('../../config/db');
+const ProgramModel = require('../program/program.model');
 
-const buatPendaftaran = async ({ siswa_id, tahun_ajaran_id, program_id, catatan, orang_tua_id }) => {
-  if (!siswa_id || !tahun_ajaran_id || !program_id || !orang_tua_id) {
+const buatPendaftaran = async ({ siswa_id, tahun_ajaran_id, program_id, catatan, orang_tua_id, program_jalur_id }) => {
+  if (!siswa_id || !tahun_ajaran_id || !program_id || !orang_tua_id || !program_jalur_id) {
     throw new BadRequestError('Semua field wajib diisi');
   }
   // Validasi tambahan bisa ditambahkan di sini (misal: cek kuota, cek status, dsb)
-  return await PendaftaranModel.createPendaftaran({ siswa_id, tahun_ajaran_id, program_id, catatan, orang_tua_id});
+  return await PendaftaranModel.createPendaftaran({ siswa_id, tahun_ajaran_id, program_id, catatan, orang_tua_id, program_jalur_id });
 };
 
 const getAllPendaftaran = async () => {
@@ -20,25 +21,45 @@ const riwayatPendaftaranOrangTua = async (user_id) => {
   return await PendaftaranModel.getPendaftaranByOrangTua(user_id);
 };
 const getDetailPendaftaran = async ({ siswa_id, program_id, orang_tua_id }) => {
+  // Ambil jalur pendaftar dari tabel program_jalur_pendaftar
+  const jalurResult = await db.query(
+    `SELECT jenis_pendaftar FROM program_jalur_pendaftar WHERE program_id = $1 LIMIT 1`,
+    [program_id]
+  );
+  const jalur_pendaftaran = jalurResult.rows[0]?.jenis_pendaftar || null;
+
   const result = await db.query(
     `SELECT 
       s.nama_lengkap AS nama_lengkap_siswa,
       ot.nama_lengkap AS nama_lengkap_orangtua,
       ot.alamat AS alamat_orangtua,
       ot.no_hp AS no_hp_orangtua,
-      ot.nik AS nik_orangtua,
-      ps.jenis_pendaftar AS jalur_pendaftaran
+      ot.nik AS nik_orangtua
     FROM siswa s
     JOIN orang_tua ot ON s.orang_tua_id = ot.user_id
-    JOIN program_sekolah ps ON ps.program_id = $2
-    WHERE s.siswa_id = $1 AND ot.user_id = $3
+    WHERE s.siswa_id = $1 AND ot.user_id = $2
     LIMIT 1`,
-    [siswa_id, program_id, orang_tua_id]
+    [siswa_id, orang_tua_id]
   );
-  return result.rows[0] || {};
+  return { ...result.rows[0], jalur_pendaftaran };
 };
 
 const updateStatusPendaftaran = async (id, status_pendaftaran) => {
+  // Ambil data pendaftaran
+  const pendaftaran = await PendaftaranModel.getPendaftaranById(id);
+  if (!pendaftaran) throw new NotFoundError('Pendaftaran tidak ditemukan');
+
+  // Jika status diubah ke lulus, cek dan kurangi kuota jalur
+  if (status_pendaftaran === 'lulus') {
+    if (!pendaftaran.program_jalur_id) throw new BadRequestError('Jalur pendaftaran tidak ditemukan');
+    // Ambil data jalur
+    const jalur = await ProgramModel.getJalurById(pendaftaran.program_jalur_id);
+    if (!jalur) throw new NotFoundError('Jalur tidak ditemukan');
+    if (!jalur.kuota_jalur || jalur.kuota_jalur < 1) throw new BadRequestError('Kuota jalur sudah habis');
+    // Kurangi kuota jalur
+    await ProgramModel.decrementKuotaJalur(pendaftaran.program_jalur_id);
+  }
+
   let updatedPendaftaran = await PendaftaranModel.updateStatus(id, status_pendaftaran);
 
   // Jika data lama tidak memiliki orang_tua_id, cari secara manual
@@ -49,7 +70,8 @@ const updateStatusPendaftaran = async (id, status_pendaftaran) => {
     }
   }
 
-  // Kirim email jika lulus
+  // Kirim email jika lulus (DISABLED SEMENTARA)
+  /*
   if (status_pendaftaran === 'lulus') {
     // Ambil data orang tua dan anak
     const result = await db.query(`
@@ -69,6 +91,7 @@ const updateStatusPendaftaran = async (id, status_pendaftaran) => {
       });
     }
   }
+  */
   return updatedPendaftaran;
 };
 
