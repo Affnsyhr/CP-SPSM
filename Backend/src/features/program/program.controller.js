@@ -38,9 +38,23 @@ const deleteProgram = async (req, res, next) => {
   }
 };
 
+// Update kuota jalur
+const updateKuotaJalur = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { kuota_jalur } = req.body;
+    const updated = await ProgramService.updateKuotaJalur(id, kuota_jalur);
+    if (!updated) return res.status(404).json({ status: 'error', message: 'Jalur tidak ditemukan' });
+    res.json({ status: 'success', message: 'Kuota jalur berhasil diupdate', data: updated });
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   createProgram,
   getAllPrograms,
   updateProgram,
   deleteProgram,
+  updateKuotaJalur
 }; 
