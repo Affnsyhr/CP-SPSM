@@ -1,10 +1,10 @@
 const db = require('../../config/db');
 
-const createTahunAjaran = async ({ tahun_ajaran, tanggal_mulai, tanggal_berakhir, status }) => {
+const createTahunAjaran = async ({ tahun_ajaran, tanggal_mulai, tanggal_berakhir, status, created_by }) => {
   const result = await db.query(
-    `INSERT INTO tahun_ajaran (tahun_ajaran, tanggal_mulai, tanggal_berakhir, status)
-     VALUES ($1, $2, $3, $4) RETURNING *`,
-    [tahun_ajaran, tanggal_mulai, tanggal_berakhir, status]
+    `INSERT INTO tahun_ajaran (tahun_ajaran, tanggal_mulai, tanggal_berakhir, status, created_by)
+     VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+    [tahun_ajaran, tanggal_mulai, tanggal_berakhir, status, created_by]
   );
   return result.rows[0];
 };

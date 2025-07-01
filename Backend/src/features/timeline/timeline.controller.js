@@ -2,7 +2,8 @@ const TimelineService = require('./timeline.service');
 
 const createTimeline = async (req, res, next) => {
   try {
-    const timeline = await TimelineService.createTimeline(req.body);
+    const data = { ...req.body, created_by: req.user.user_id };
+    const timeline = await TimelineService.createTimeline(data);
     res.status(201).json({ status: 'success', message: 'Timeline berhasil dibuat', data: timeline });
   } catch (err) {
     next(err);

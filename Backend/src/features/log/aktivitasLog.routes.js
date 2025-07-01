@@ -18,4 +18,17 @@ router.get('/', async (req, res, next) => {
   }
 });
 
+// Endpoint: POST /api/log
+router.post('/', async (req, res, next) => {
+  try {
+    const { aktivitas } = req.body;
+    const user_id = req.user.user_id;
+    const ip_address = req.ip;
+    const log = await require('./aktivitasLog.service').logAktivitas({ user_id, aktivitas, ip_address });
+    res.status(201).json({ status: 'success', message: 'Log aktivitas berhasil dibuat', data: log });
+  } catch (err) {
+    next(err);
+  }
+});
+
 module.exports = router;

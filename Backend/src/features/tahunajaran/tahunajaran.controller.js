@@ -2,7 +2,8 @@ const TahunAjaranService = require('./tahunajaran.service');
 
 const createTahunAjaran = async (req, res, next) => {
   try {
-    const tahunAjaran = await TahunAjaranService.createTahunAjaran(req.body);
+    const data = { ...req.body, created_by: req.user.user_id };
+    const tahunAjaran = await TahunAjaranService.createTahunAjaran(data);
     res.status(201).json({ status: 'success', message: 'Tahun ajaran berhasil dibuat', data: tahunAjaran });
   } catch (err) {
     next(err);

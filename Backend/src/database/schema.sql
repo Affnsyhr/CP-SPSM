@@ -1,150 +1,160 @@
--- Table: role
-CREATE TABLE role (
-  role_id SERIAL PRIMARY KEY,
-  nama_role VARCHAR(20) NOT NULL UNIQUE,
-  deskripsi TEXT
-);
-COMMENT ON COLUMN role.nama_role IS 'orang_tua';
+CREATE TYPE public.jenis_dokumen_enum AS ENUM ('akta_kelahiran', 'kartu_keluarga', 'ijazah', 'foto', 'lainnya');
+CREATE TYPE public.jenis_kelamin_enum AS ENUM ('L', 'P');
+CREATE TYPE public.jenis_notif_enum AS ENUM ('kelulusan', 'dokumen', 'sistem', 'pembayaran');
+CREATE TYPE public.jenis_pendaftar_enum AS ENUM ('reguler', 'Prestasi akademik', 'prestasi non akademik', 'tahfiz');
+CREATE TYPE public.nama_program_enum AS ENUM ('boarding School', 'Full day school');
+CREATE TYPE public.status_baca_enum AS ENUM ('terbaca', 'belum_dibaca');
+CREATE TYPE public.status_pendaftaran_enum AS ENUM ('proses', 'lulus', 'tidak_lulus', 'cadangan');
+CREATE TYPE public.status_periode_enum AS ENUM ('aktif', 'nonaktif');
+CREATE TYPE public.status_program_enum AS ENUM ('aktif', 'nonaktif');
+CREATE TYPE public.status_tahun_enum AS ENUM ('aktif', 'selesai', 'persiapan');
+CREATE TYPE public.status_verifikasi_enum AS ENUM ('menunggu', 'diterima', 'ditolak');
 
--- Table: users
-CREATE TABLE users (
-  user_id SERIAL PRIMARY KEY,
-  username VARCHAR(50) NOT NULL UNIQUE,
-  password_hash VARCHAR(255) NOT NULL,
-  email VARCHAR(100) NOT NULL UNIQUE,
-  created_at TIMESTAMP NOT NULL,
-  last_login TIMESTAMP,
-  role_id INTEGER NOT NULL REFERENCES role(role_id)
-);
-COMMENT ON COLUMN users.role_id IS 'orang_tua';
-
--- Table: user_profile
-CREATE TABLE orang_tua (
-  user_id INTEGER PRIMARY KEY REFERENCES users(user_id),
-  nama_lengkap VARCHAR(100) NOT NULL,
-  nik VARCHAR(20) UNIQUE,
-  alamat TEXT,
-  no_hp VARCHAR(15)
+CREATE TABLE public.aktivitas_log (
+    log_id integer NOT NULL,
+    user_id integer,
+    aktivitas text NOT NULL,
+    "timestamp" timestamp NOT NULL,
+    ip_address varchar(45)
 );
 
--- Table: siswa
-CREATE TYPE jenis_kelamin_enum AS ENUM ('L', 'P');
-CREATE TABLE siswa (
-  siswa_id SERIAL PRIMARY KEY,
-  orang_tua_id INTEGER REFERENCES user_profile(user_id),
-  nama_lengkap VARCHAR(100) NOT NULL,
-  tempat_lahir VARCHAR(50),
-  tanggal_lahir DATE,
-  jenis_kelamin jenis_kelamin_enum NOT NULL,
-  created_at TIMESTAMP NOT NULL
+CREATE SEQUENCE public.aktivitas_log_log_id_seq START 1;
+ALTER TABLE public.aktivitas_log ALTER COLUMN log_id SET DEFAULT nextval('public.aktivitas_log_log_id_seq');
+
+CREATE TABLE public.backup_database (
+    backup_id integer NOT NULL,
+    nama_file varchar(255) NOT NULL,
+    ukuran varchar(20),
+    tanggal_backup timestamp NOT NULL,
+    dibuat_oleh integer
 );
 
--- Table: program_sekolah
-CREATE TYPE nama_program_enum AS ENUM ('boarding School', 'Full day school');
-CREATE TYPE status_program_enum AS ENUM ('aktif', 'nonaktif');
-CREATE TYPE jenis_pendaftar_enum AS ENUM ('reguler','Prestasi akademik','prestasi non akademik','tahfiz');
-CREATE TABLE program_sekolah (
-  program_id SERIAL PRIMARY KEY,
-  nama_program nama_program_enum NOT NULL,
-  deskripsi TEXT,
-  status_program status_program_enum DEFAULT 'aktif',
-  kuota_siswa INTEGER,
-  jenis_pendaftar jenis_pendaftar_enum DEFAULT 'reguler' NOT NULL
-);
-COMMENT ON COLUMN program_sekolah.nama_program IS 'Program khusus madrasah SMP';
-COMMENT ON COLUMN program_sekolah.kuota_siswa IS 'Jumlah maksimal siswa per angkatan';
-COMMENT ON COLUMN program_sekolah.jenis_pendaftar IS 'Jenis pendaftar yang diterima program';
+CREATE SEQUENCE public.backup_database_backup_id_seq START 1;
+ALTER TABLE public.backup_database ALTER COLUMN backup_id SET DEFAULT nextval('public.backup_database_backup_id_seq');
 
--- -- Table: periode_pendaftaran
--- CREATE TYPE status_periode_enum AS ENUM ('aktif', 'nonaktif');
--- CREATE TABLE periode_pendaftaran (
---   periode_id SERIAL PRIMARY KEY,
---   nama_periode VARCHAR(50) NOT NULL,
---   tanggal_mulai DATE NOT NULL,
---   tanggal_berakhir DATE NOT NULL,
---   status status_periode_enum DEFAULT 'nonaktif',
---   created_by INTEGER REFERENCES users(user_id)
--- );
-
--- Table: dokumen_pendaftaran
-CREATE TYPE jenis_dokumen_enum AS ENUM ('akta_kelahiran', 'kartu_keluarga', 'ijazah', 'foto', 'lainnya');
-CREATE TYPE status_verifikasi_enum AS ENUM ('menunggu', 'diterima', 'ditolak');
-CREATE TABLE dokumen_pendaftaran (
-  dokumen_id SERIAL PRIMARY KEY,
-  siswa_id INTEGER REFERENCES siswa(siswa_id),
-  jenis_dokumen jenis_dokumen_enum NOT NULL,
-  nama_file VARCHAR(255),
-  status_verifikasi status_verifikasi_enum DEFAULT 'menunggu',
-  tanggal_upload TIMESTAMP,
-  tanggal_verifikasi TIMESTAMP,
-  verified_by INTEGER REFERENCES users(user_id),
-  catatan TEXT
+CREATE TABLE public.data_pendaftaran (
+    pendaftaran_id integer NOT NULL,
+    siswa_id integer,
+    orang_tua_id integer,
+    dokumen_id integer,
+    id_tahunajaran integer,
+    program_id integer,
+    tanggal_daftar timestamp NOT NULL,
+    status_pendaftaran public.status_pendaftaran_enum DEFAULT 'proses',
+    catatan text
 );
 
--- Table: data_pendaftaran
-CREATE TYPE status_pendaftaran_enum AS ENUM ('proses', 'lulus', 'tidak_lulus', 'cadangan');
-CREATE TABLE data_pendaftaran (
-  pendaftaran_id SERIAL PRIMARY KEY,
-  siswa_id INTEGER REFERENCES siswa(siswa_id),
-  orang_tua_id INTEGER REFERENCES user_profile(user_id),
-  dokumen_id INTEGER REFERENCES dokumen_pendaftaran(dokumen_id),
-  id_tahunajaran INTEGER REFERENCES tahun_ajaran(id_tahunajaran),
-  program_id INTEGER REFERENCES program_sekolah(program_id),
-  tanggal_daftar TIMESTAMP NOT NULL,
-  status_pendaftaran status_pendaftaran_enum DEFAULT 'proses',
-  catatan TEXT
+CREATE SEQUENCE public.data_pendaftaran_pendaftaran_id_seq START 1;
+ALTER TABLE public.data_pendaftaran ALTER COLUMN pendaftaran_id SET DEFAULT nextval('public.data_pendaftaran_pendaftaran_id_seq');
+
+CREATE TABLE public.dokumen_pendaftaran (
+    dokumen_id integer NOT NULL,
+    siswa_id integer,
+    jenis_dokumen public.jenis_dokumen_enum NOT NULL,
+    nama_file varchar(255),
+    status_verifikasi public.status_verifikasi_enum DEFAULT 'menunggu',
+    tanggal_upload timestamp,
+    tanggal_verifikasi timestamp,
+    verified_by integer,
+    catatan text
 );
 
--- Table: tahun_ajaran
-CREATE TABLE tahun_ajaran (
-  id_tahunajaran SERIAL PRIMARY KEY,
-  tahun_ajaran VARCHAR(20) NOT NULL UNIQUE,
-  tanggal_mulai DATE NOT NULL,
-  tanggal_berakhir DATE NOT NULL,
-  status status_tahun_ajaran_enum DEFAULT 'persiapan',
-  created_by INTEGER REFERENCES users(user_id)
+CREATE SEQUENCE public.dokumen_pendaftaran_dokumen_id_seq START 1;
+ALTER TABLE public.dokumen_pendaftaran ALTER COLUMN dokumen_id SET DEFAULT nextval('public.dokumen_pendaftaran_dokumen_id_seq');
+
+CREATE TABLE public.notifikasi (
+    notif_id integer NOT NULL,
+    penerima_id integer,
+    judul varchar(100) NOT NULL,
+    isi text,
+    tanggal_kirim timestamp NOT NULL,
+    status_baca public.status_baca_enum DEFAULT 'belum_dibaca',
+    jenis_notif public.jenis_notif_enum
 );
 
-COMMENT ON COLUMN tahun_ajaran.tahun_ajaran IS 'Format tahun ajaran seperti "2025/2026" atau "2025-2026"';
-COMMENT ON COLUMN tahun_ajaran.tanggal_mulai IS 'Tanggal mulai tahun ajaran';
-COMMENT ON COLUMN tahun_ajaran.tanggal_berakhir IS 'Tanggal berakhir tahun ajaran';
+CREATE SEQUENCE public.notifikasi_notif_id_seq START 1;
+ALTER TABLE public.notifikasi ALTER COLUMN notif_id SET DEFAULT nextval('public.notifikasi_notif_id_seq');
 
--- Table: timeline_pendaftaran
-CREATE TABLE timeline_pendaftaran (
-  timeline_id SERIAL PRIMARY KEY,
-  id_tahunajaran INTEGER REFERENCES tahun_ajaran(id_tahunajaran),
-  nama_kegiatan VARCHAR(100) NOT NULL,
-  tanggal_mulai TIMESTAMP NOT NULL,
-  tanggal_selesai TIMESTAMP NOT NULL
+CREATE TABLE public.orang_tua (
+    user_id integer NOT NULL,
+    nama_lengkap varchar(100) NOT NULL,
+    nik varchar(20),
+    alamat text,
+    no_hp varchar(15)
 );
 
--- Table: notifikasi
-CREATE TYPE status_baca_enum AS ENUM ('terbaca', 'belum_dibaca');
-CREATE TYPE jenis_notif_enum AS ENUM ('kelulusan', 'dokumen', 'sistem', 'pembayaran');
-CREATE TABLE notifikasi (
-  notif_id SERIAL PRIMARY KEY,
-  penerima_id INTEGER REFERENCES users(user_id),
-  judul VARCHAR(100) NOT NULL,
-  isi TEXT,
-  tanggal_kirim TIMESTAMP NOT NULL,
-  status_baca status_baca_enum DEFAULT 'belum_dibaca',
-  jenis_notif jenis_notif_enum
+CREATE TABLE public.program_jalur_pendaftar (
+    program_id integer NOT NULL,
+    jenis_pendaftar public.jenis_pendaftar_enum NOT NULL
 );
 
--- Table: aktivitas_log
-CREATE TABLE aktivitas_log (
-  log_id SERIAL PRIMARY KEY,
-  user_id INTEGER REFERENCES users(user_id),
-  aktivitas TEXT NOT NULL,
-  timestamp TIMESTAMP NOT NULL,
-  ip_address VARCHAR(45)
+CREATE TABLE public.program_sekolah (
+    program_id integer NOT NULL,
+    nama_program public.nama_program_enum NOT NULL,
+    deskripsi text,
+    status_program public.status_program_enum DEFAULT 'aktif',
+    kuota_siswa integer
 );
 
--- Table: backup_database
-CREATE TABLE backup_database (
-  backup_id SERIAL PRIMARY KEY,
-  nama_file VARCHAR(255) NOT NULL,
-  ukuran VARCHAR(20),
-  tanggal_backup TIMESTAMP NOT NULL,
-  dibuat_oleh INTEGER REFERENCES users(user_id)
+CREATE SEQUENCE public.program_sekolah_program_id_seq START 1;
+ALTER TABLE public.program_sekolah ALTER COLUMN program_id SET DEFAULT nextval('public.program_sekolah_program_id_seq');
+
+CREATE TABLE public.role (
+    role_id integer NOT NULL,
+    nama_role varchar(20) NOT NULL,
+    deskripsi text
 );
+
+CREATE SEQUENCE public.role_role_id_seq START 1;
+ALTER TABLE public.role ALTER COLUMN role_id SET DEFAULT nextval('public.role_role_id_seq');
+
+CREATE TABLE public.siswa (
+    siswa_id integer NOT NULL,
+    orang_tua_id integer,
+    nama_lengkap varchar(100) NOT NULL,
+    tempat_lahir varchar(50),
+    tanggal_lahir date,
+    jenis_kelamin public.jenis_kelamin_enum NOT NULL,
+    created_at timestamp NOT NULL
+);
+
+CREATE SEQUENCE public.siswa_siswa_id_seq START 1;
+ALTER TABLE public.siswa ALTER COLUMN siswa_id SET DEFAULT nextval('public.siswa_siswa_id_seq');
+
+CREATE TABLE public.tahun_ajaran (
+    id_tahunajaran integer NOT NULL,
+    tahun_ajaran varchar(20) NOT NULL,
+    tanggal_mulai date NOT NULL,
+    tanggal_berakhir date NOT NULL,
+    status public.status_tahun_enum DEFAULT 'persiapan',
+    created_by integer
+);
+
+CREATE SEQUENCE public.tahun_ajaran_id_tahunajaran_seq START 1;
+ALTER TABLE public.tahun_ajaran ALTER COLUMN id_tahunajaran SET DEFAULT nextval('public.tahun_ajaran_id_tahunajaran_seq');
+
+CREATE TABLE public.timeline_pendaftaran (
+    timeline_id integer NOT NULL,
+    id_tahunajaran integer,
+    nama_kegiatan varchar(100) NOT NULL,
+    tanggal_mulai timestamp NOT NULL,
+    tanggal_selesai timestamp NOT NULL,
+    deskripsi text
+);
+
+CREATE SEQUENCE public.timeline_pendaftaran_timeline_id_seq START 1;
+ALTER TABLE public.timeline_pendaftaran ALTER COLUMN timeline_id SET DEFAULT nextval('public.timeline_pendaftaran_timeline_id_seq');
+
+CREATE TABLE public.users (
+    user_id integer NOT NULL,
+    username varchar(50) NOT NULL,
+    password_hash varchar(255) NOT NULL,
+    email varchar(100) NOT NULL,
+    created_at timestamp NOT NULL,
+    last_login timestamp,
+    role_id integer NOT NULL,
+    is_active boolean DEFAULT true
+);
+
+CREATE SEQUENCE public.users_user_id_seq START 1;
+ALTER TABLE public.users ALTER COLUMN user_id SET DEFAULT nextval('public.users_user_id_seq');
