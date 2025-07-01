@@ -5,49 +5,75 @@ class AuthController {
   static async register(req, res) {
     try {
       const result = await AuthService.register(req.body);
-      if (result.error) {
-        return res.status(result.status).json({
+      if (result.status === 'error') {
+        return res.status(result.code || 400).json({
           status: 'error',
-          message: result.error
+          message: result.message || result.error,
+          error: result.error || undefined,
+          data: req.body
         });
       }
       return res.status(201).json({
         status: 'success',
         message: 'Registrasi berhasil',
-        data: { userId: result.userId }
+        data: {
+          userId: result.userId,
+          username: req.body.username,
+          email: req.body.email,
+          nama_lengkap: req.body.nama_lengkap,
+          nik: req.body.nik,
+          alamat: req.body.alamat,
+          no_hp: req.body.no_hp,
+          role: req.body.role
+        }
       });
     } catch (error) {
-      console.error('Register error:', error);
+      console.error('Register error:', error, error.stack);
       return res.status(500).json({
         status: 'error',
         message: 'Terjadi kesalahan saat registrasi',
-        error: error.message
+        error: error.message,
+        data: req.body
       });
     }
   }
 
   static async login(req, res) {
     try {
-      const { username, password } = req.body;
+      const { email, username, password } = req.body;
 
-      if (!username || !password) {
+      if ((!username && !email) || !password) {
         return res.status(400).json({
           status: 'error',
-          message: 'Username dan password harus diisi'
+          message: 'Email/Username dan password harus diisi'
         });
       }
 
-      const result = await AuthService.login(username, password);
+      let loginIdentifier = username;
+      // Jika email dikirim, cari username berdasarkan email
+      if (email && !username) {
+        // Query ke database untuk dapatkan username dari email
+        const db = require('../../config/db');
+        const result = await db.query('SELECT username FROM users WHERE email = $1', [email]);
+        if (result.rows.length === 0) {
+          return res.status(404).json({
+            status: 'error',
+            message: 'Email tidak ditemukan'
+          });
+        }
+        loginIdentifier = result.rows[0].username;
+      }
 
-    if (result.status === 'error') {
-      // Gunakan result.code untuk status HTTP
-      return res.status(result.code || 500).json({
-        status: result.status,
-        message: result.message
-      });
-    }
+      const result = await AuthService.login(loginIdentifier, password);
 
-    return res.status(200).json(result);
+      if (result.status === 'error') {
+        return res.status(result.code || 500).json({
+          status: result.status,
+          message: result.message
+        });
+      }
+
+      return res.status(200).json(result);
     } catch (error) {
       console.error('Login error:', error);
       return res.status(500).json({
@@ -135,3 +161,4 @@ static async resetOrangtuaPassword(req, res) {
 }
 
 module.exports = AuthController;
+

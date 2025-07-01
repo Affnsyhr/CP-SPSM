@@ -52,9 +52,14 @@ class AuthService {
         SELECT 
           u.*,
           r.nama_role,
-          r.role_id
+          r.role_id,
+          ot.nama_lengkap,
+          ot.nik,
+          ot.alamat,
+          ot.no_hp
         FROM users u 
         JOIN role r ON u.role_id = r.role_id 
+        LEFT JOIN orang_tua ot ON u.user_id = ot.user_id
         WHERE u.username = $1
       `, [username]);
 
@@ -64,6 +69,7 @@ class AuthService {
           username: result.rows[0].username,
           role: result.rows[0].nama_role,
           role_id: result.rows[0].role_id,
+          nama_lengkap: result.rows[0].nama_lengkap,
           hasPassword: !!result.rows[0].password_hash
         } : null
       });
@@ -73,6 +79,15 @@ class AuthService {
       }
 
       const user = result.rows[0];
+
+      // Tambahkan pengecekan status aktif
+      if (user.is_active === false) {
+        return {
+          status: 'error',
+          message: 'Akun dinonaktifkan. Silakan hubungi admin.',
+          code: 403
+        };
+      }
 
       // Verify password
       const isMatch = await bcrypt.compare(password, user.password_hash);
@@ -108,19 +123,24 @@ class AuthService {
         [user.user_id]
       );
 
-      // Return response berdasarkan role
+      // Return response berdasarkan role dengan data yang lebih lengkap
       const userData = {
         user_id: user.user_id,
         username: user.username,
         email: user.email,
         role: user.nama_role,
-        role_id: user.role_id
+        role_id: user.role_id,
+        nama_lengkap: user.nama_lengkap,
+        nik: user.nik,
+        alamat: user.alamat,
+        no_hp: user.no_hp
       };
 
       console.log('Login successful:', {
         username: user.username,
         role: user.nama_role,
         role_id: user.role_id,
+        nama_lengkap: user.nama_lengkap,
         token: token.substring(0, 20) + '...'
       });
 
