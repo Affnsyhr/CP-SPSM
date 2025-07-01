@@ -11,7 +11,14 @@ router.use(authorizeRoles(ROLES.SUPERADMIN, ROLES.ADMIN_TU));
 // Endpoint: GET /api/log
 router.get('/', async (req, res, next) => {
   try {
-    const result = await db.query('SELECT * FROM aktivitas_log ORDER BY timestamp DESC LIMIT 100');
+    const result = await db.query(`
+      SELECT l.*, u.username, u.role_id, r.nama_role
+      FROM aktivitas_log l
+      LEFT JOIN users u ON l.user_id = u.user_id
+      LEFT JOIN role r ON u.role_id = r.role_id
+      ORDER BY l.timestamp DESC
+      LIMIT 100
+    `);
     res.json({ status: 'success', data: result.rows });
   } catch (err) {
     next(err);
