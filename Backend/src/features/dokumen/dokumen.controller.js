@@ -89,10 +89,49 @@ const deleteDokumen = async (req, res, next) => {
   }
 };
 
+const getAllDokumen = async (req, res, next) => {
+  try {
+    const db = require('../../config/db');
+    const result = await db.query(`
+      SELECT d.dokumen_id, d.jenis_dokumen, d.nama_file, d.status_verifikasi, d.tanggal_upload, d.catatan,
+             s.nama_lengkap AS nama_siswa, s.siswa_id, p.pendaftaran_id
+      FROM dokumen_pendaftaran d
+      JOIN siswa s ON d.siswa_id = s.siswa_id
+      JOIN data_pendaftaran p ON s.siswa_id = p.siswa_id
+      ORDER BY d.tanggal_upload DESC
+    `);
+    res.json({ status: 'success', data: result.rows });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const getAllDokumenAdmin = async (req, res, next) => {
+  try {
+    if (req.user?.role_id !== 3) {
+      return res.status(403).json({ status: 'error', message: 'Akses hanya untuk admin TU' });
+    }
+    const db = require('../../config/db');
+    const result = await db.query(`
+      SELECT d.dokumen_id, d.jenis_dokumen, d.nama_file, d.status_verifikasi, d.tanggal_upload, d.catatan,
+             s.nama_lengkap AS nama_siswa, s.siswa_id, p.pendaftaran_id
+      FROM dokumen_pendaftaran d
+      JOIN siswa s ON d.siswa_id = s.siswa_id
+      JOIN data_pendaftaran p ON s.siswa_id = p.siswa_id
+      ORDER BY d.tanggal_upload DESC
+    `);
+    res.json({ status: 'success', data: result.rows });
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   uploadDokumen,
   getDokumenByPendaftaran,
   verifikasiDokumen,
   updateDokumenFile,
   deleteDokumen,
+  getAllDokumen,
+  getAllDokumenAdmin,
 };
