@@ -10,6 +10,7 @@ const siswaRoutes = require('../features/siswa/siswa.routes');
 const programRoutes = require('../features/program/program.routes');
 const timelineRoutes = require('../features/timeline/timeline.routes');
 const tahunAjaranRoutes = require('../features/tahunajaran/tahunajaran.routes');
+const headmasterRoutes = require('../features/headmaster/headmaster.routes');
 const router = express.Router();
 
 // API Routes
@@ -21,9 +22,10 @@ router.use('/monitoring', monitoringRoutes);
 router.use('/orangtua/dashboard', orangtuaDashboardRoutes);
 router.use('/log', aktivitasLogRoutes);
 router.use('/siswa', siswaRoutes);
-router.use('/programs', programRoutes);
+router.use('/program', programRoutes);
 router.use('/timeline', timelineRoutes);
 router.use('/tahunajaran', tahunAjaranRoutes);
+router.use('/headmaster', headmasterRoutes);
 // Health check endpoint
 router.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'Server is running' });
