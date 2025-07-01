@@ -18,6 +18,16 @@ const getAllSiswaByOrangTua = async (orang_tua_id) => {
   return result.rows;
 };
 
+const getAllSiswa = async () => {
+  const result = await db.query(
+    `SELECT s.*, u.username as nama_orang_tua, u.email as email_orang_tua 
+     FROM siswa s 
+     LEFT JOIN users u ON s.orang_tua_id = u.user_id 
+     ORDER BY s.created_at DESC`
+  );
+  return result.rows;
+};
+
 const getSiswaById = async (siswa_id) => {
   const result = await db.query(
     'SELECT * FROM siswa WHERE siswa_id = $1',
@@ -29,5 +39,6 @@ const getSiswaById = async (siswa_id) => {
 module.exports = {
   createSiswa,
   getAllSiswaByOrangTua,
+  getAllSiswa,
   getSiswaById
 };

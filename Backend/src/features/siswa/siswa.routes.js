@@ -1,5 +1,5 @@
 const express = require('express');
-const { tambahSiswa, getDaftarSiswa } = require('./siswa.controller');
+const { tambahSiswa, getDaftarSiswa, getAllSiswa } = require('./siswa.controller');
 const authMiddleware = require('../../middlewares/authMiddleware');
 const authorizeRoles = require('../../middlewares/authorizeRoles');
 const { ROLES } = require('../../constants/roles');
@@ -7,11 +7,14 @@ const { ROLES } = require('../../constants/roles');
 const router = express.Router();
 
 router.use(authMiddleware);
-router.use(authorizeRoles(ROLES.ORANG_TUA));
 
-// Tambah siswa (anak)
-router.post('/', tambahSiswa);
-// Lihat daftar siswa milik orang tua
-router.get('/', getDaftarSiswa);
+// Tambah siswa (anak) - hanya untuk orang tua
+router.post('/', authorizeRoles(ROLES.ORANG_TUA), tambahSiswa);
+
+// Lihat daftar siswa milik orang tua - hanya untuk orang tua
+router.get('/my', authorizeRoles(ROLES.ORANG_TUA), getDaftarSiswa);
+
+// Lihat semua siswa - untuk super admin dan admin
+router.get('/', authorizeRoles(ROLES.SUPERADMIN, ROLES.ADMIN_TU), getAllSiswa);
 
 module.exports = router;

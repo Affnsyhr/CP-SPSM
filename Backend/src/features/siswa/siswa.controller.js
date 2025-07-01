@@ -1,6 +1,7 @@
 const SiswaService = require('./siswa.service');
 
 const tambahSiswa = async (req, res, next) => {
+  console.log('Payload siswa:', req.body);
   try {
     const orang_tua_id = req.user.user_id;
     const siswa = await SiswaService.buatSiswa(orang_tua_id, req.body);
@@ -27,7 +28,20 @@ const getDaftarSiswa = async (req, res, next) => {
   }
 };
 
+const getAllSiswa = async (req, res, next) => {
+  try {
+    const siswa = await SiswaService.getAllSiswa();
+    res.status(200).json({
+      status: 'success',
+      data: siswa,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   tambahSiswa,
   getDaftarSiswa,
+  getAllSiswa,
 };
