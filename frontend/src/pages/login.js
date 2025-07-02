@@ -16,55 +16,256 @@ export default function LoginPage() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [step, setStep] = useState("login"); // login, request-otp, verify-otp, new-password
+  
+  // State untuk tracking field yang sudah disentuh
+  const [touchedFields, setTouchedFields] = useState({
+    email: false,
+    password: false
+  });
+  
+  // State untuk tracking error status setiap field
+  const [fieldErrors, setFieldErrors] = useState({
+    email: null,
+    password: null
+  });
+  
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleChange = (e) => {
-    const { id, value } = e.target;
-    setFormData((prev) => ({ ...prev, [id]: value }));
+  // Fungsi validasi field
+  const validateField = (fieldName, value) => {
+    switch (fieldName) {
+      case 'email':
+        if (!value.trim()) {
+          return 'Email wajib diisi';
+        }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          return 'Format email tidak valid';
+        }
+        return null;
+
+      case 'password':
+        if (!value.trim()) {
+          return 'Password wajib diisi';
+        }
+        return null;
+
+      default:
+        return null;
+    }
+  };
+
+  // Handler untuk field blur (saat user selesai mengetik)
+  const handleFieldBlur = (fieldName, value) => {
+    setTouchedFields(prev => ({ ...prev, [fieldName]: true }));
+    
+    const error = validateField(fieldName, value);
+    setFieldErrors(prev => ({ ...prev, [fieldName]: error }));
+    
+    if (error) {
+      toast({
+        title: "Kesalahan Pengisian",
+        description: error,
+        variant: "destructive",
+        duration: 3000,
+      });
+    }
+  };
+
+  // Handler untuk validasi real-time saat mengetik
+  const handleFieldChange = (fieldName, value) => {
+    setFormData(prev => ({ ...prev, [fieldName]: value }));
+    
+    // Hanya validasi jika field sudah pernah disentuh
+    if (touchedFields[fieldName]) {
+      const error = validateField(fieldName, value);
+      setFieldErrors(prev => ({ ...prev, [fieldName]: error }));
+      
+      if (error) {
+        toast({
+          title: "Kesalahan Pengisian",
+          description: error,
+          variant: "destructive",
+          duration: 2000,
+        });
+      }
+    }
+  };
+
+  // Fungsi untuk mendapatkan class CSS berdasarkan error status
+  const getInputClassName = (fieldName) => {
+    const baseClass = "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
+    
+    if (touchedFields[fieldName] && fieldErrors[fieldName]) {
+      return `${baseClass} border-red-500 focus-visible:ring-red-500`;
+    }
+    
+    return baseClass;
+  };
+
+  // Komponen untuk menampilkan error message
+  const ErrorMessage = ({ fieldName }) => {
+    if (touchedFields[fieldName] && fieldErrors[fieldName]) {
+      return (
+        <p className="text-sm text-red-500 mt-1 flex items-center gap-1">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" x2="12" y1="8" y2="12"></line>
+            <line x1="12" x2="12.01" y1="16" y2="16"></line>
+          </svg>
+          {fieldErrors[fieldName]}
+        </p>
+      );
+    }
+    return null;
+  };
+
+  // Komponen untuk menampilkan helper text
+  const HelperText = ({ text, className = "" }) => {
+    if (!text) return null;
+    return (
+      <p className={`text-xs text-muted-foreground mt-1 ${className}`}>
+        {text}
+      </p>
+    );
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
+    // Tampilkan toast loading
+    toast({
+      title: "Memproses Login",
+      description: "Mohon tunggu sebentar...",
+      duration: 2000,
+    });
+
     try {
-      // Simulasi login API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Simulasi data user
-      const userData = {
-        email: formData.email,
-        role: determineUserRole(formData.email),
-        name: "User Name",
-      };
-
-      localStorage.setItem("user", JSON.stringify(userData));
-
-      switch (userData.role) {
-        case "admin":
-          navigate("/admin/dashboard");
-          break;
-        case "super_admin":
-          navigate("/super-admin/dashboard");
-          break;
-        case "headmaster":
-          navigate("/headmaster/dashboard");
-          break;
-        default:
-          navigate("/dashboard");
+      // Validasi input sebelum kirim ke server
+      if (!formData.email.trim()) {
+        throw new Error("Email wajib diisi");
+      }
+      
+      if (!formData.password.trim()) {
+        throw new Error("Password wajib diisi");
       }
 
-      toast({
-        title: "Login Berhasil",
-        description: `Selamat datang di dashboard ${userData.role}`,
+      // Validasi format email
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.email)) {
+        throw new Error("Format email tidak valid");
+      }
+
+      // Debug: Log URL API
+      const apiUrl = `${process.env.REACT_APP_API_URL}/api/auth/login`;
+      console.log('API URL:', apiUrl);
+      console.log('Form Data:', formData);
+
+      // Panggil API login ke Backend
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
       });
+
+      console.log('Response status:', response.status);
+      console.log('Response ok:', response.ok);
+
+      // Coba parse response JSON
+      let data;
+      try {
+        data = await response.json();
+        console.log('Response data:', data);
+      } catch (parseError) {
+        console.error('Error parsing response:', parseError);
+        throw new Error("Terjadi kesalahan saat memproses response dari server");
+      }
+
+      if (!response.ok) {
+        // Handle berbagai jenis error dari backend
+        let errorMessage = "Login gagal";
+        
+        console.log('Error response status:', response.status);
+        console.log('Error data:', data);
+        
+        if (response.status === 400) {
+          errorMessage = data.message || "Email atau password salah. Silakan cek kembali.";
+        } else if (response.status === 401) {
+          errorMessage = "Email atau password salah. Pastikan data yang dimasukkan benar.";
+        } else if (response.status === 404) {
+          errorMessage = "Akun tidak ditemukan. Pastikan email sudah terdaftar.";
+        } else if (response.status === 422) {
+          errorMessage = data.message || "Data tidak valid. Silakan cek format input.";
+        } else if (response.status === 500) {
+          errorMessage = "Terjadi kesalahan pada server. Silakan coba lagi nanti.";
+        } else {
+          errorMessage = data.message || "Terjadi kesalahan saat login. Silakan coba lagi.";
+        }
+
+        console.log('Throwing error:', errorMessage);
+        throw new Error(errorMessage);
+      }
+
+      // Login berhasil
+      console.log('Login successful, data:', data);
+      
+      // Ambil user dan token dari data.data
+      localStorage.setItem('user', JSON.stringify(data.data.user));
+      localStorage.setItem('token', data.data.token);
+      console.log('User after login:', data.data.user);
+      
+      // Tampilkan toast sukses
+      toast({
+        title: 'Login Berhasil',
+        description: `Selamat datang, ${data.data.user.nama_lengkap || data.data.user.username}!`,
+      });
+
+      // Redirect berdasarkan role
+      switch (data.data.user.role) {
+        case 'admin':
+          console.log('Redirecting to /admin/dashboard');
+          navigate('/admin/dashboard');
+          break;
+        case 'superadmin':
+          console.log('Redirecting to /super-admin/dashboard');
+          navigate('/super-admin/dashboard');
+          break;
+        case 'headmaster':
+          console.log('Redirecting to /headmaster/dashboard');
+          navigate('/headmaster/dashboard');
+          break;
+        case 'kepala_sekolah':
+          console.log('Redirecting to /headmaster/dashboard');
+          navigate('/headmaster/dashboard');
+          break;
+        case 'admin_tu':
+          console.log('Redirecting to /admin/dashboard');
+          navigate('/admin/dashboard');
+          break;
+        case 'orang_tua':
+          console.log('Redirecting to /dashboard');
+          navigate('/dashboard');
+          break;
+        default:
+          console.log('Redirecting to /login');
+          navigate('/login');
+      }
+
     } catch (error) {
+      // Tampilkan toast error dengan pesan yang spesifik
+      console.error('Login error caught:', error);
+      console.error('Error message:', error.message);
+      
       toast({
-        title: "Login Gagal",
+        title: 'Login Gagal',
         description: error.message,
-        variant: "destructive",
+        variant: 'destructive',
+        duration: 4000,
       });
+      
+      // Log error untuk debugging
+      console.error('Login error:', error);
     } finally {
       setIsLoading(false);
     }
@@ -352,10 +553,14 @@ export default function LoginPage() {
                     type="email"
                     placeholder="nama@contoh.com"
                     value={formData.email}
-                    onChange={handleChange}
+                    onChange={(e) => handleFieldChange('email', e.target.value)}
+                    onBlur={(e) => handleFieldBlur('email', e.target.value)}
                     required
                     disabled={isLoading}
+                    className={getInputClassName('email')}
                   />
+                  <HelperText text="Masukkan email yang sudah terdaftar" />
+                  <ErrorMessage fieldName="email" />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="password">Password</Label>
@@ -364,10 +569,13 @@ export default function LoginPage() {
                     type="password"
                     placeholder="••••••••"
                     value={formData.password}
-                    onChange={handleChange}
+                    onChange={(e) => handleFieldChange('password', e.target.value)}
+                    onBlur={(e) => handleFieldBlur('password', e.target.value)}
                     required
                     disabled={isLoading}
+                    className={getInputClassName('password')}
                   />
+                  <ErrorMessage fieldName="password" />
                 </div>
                 <Button
                   type="button"

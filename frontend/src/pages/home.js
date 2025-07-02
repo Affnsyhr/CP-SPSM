@@ -3,6 +3,11 @@ import { Header } from "../components/layout/header";
 import { Footer } from "../components/layout/footer";
 import { Button } from "../components/ui/button";
 import { Link } from "react-router-dom";
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation, Pagination, Autoplay } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
 
 export default function HomePage() {
   return (
@@ -36,14 +41,28 @@ export default function HomePage() {
                   </Link>
                 </div>
               </div>
-              <div className="flex items-center justify-center">
-                <img
-                  src="/Logo3.png"
-                  alt="Ilustrasi Pendaftaran"
-                  width={550}
-                  height={550}
-                  className="rounded-lg object-cover"
-                />
+              <div className="flex items-center justify-center w-full">
+                <Swiper
+                  modules={[Navigation, Pagination, Autoplay]}
+                  navigation
+                  pagination={{ clickable: true }}
+                  autoplay={{ delay: 2500, disableOnInteraction: false }}
+                  loop
+                  className="w-[280px] h-[280px] sm:w-[340px] sm:h-[340px] md:w-[400px] md:h-[400px] rounded-lg"
+                >
+                  <SwiperSlide>
+                    <img src="/Logo.png" alt="Logo 1" className="object-cover w-full h-full rounded-lg" />
+                  </SwiperSlide>
+                  <SwiperSlide>
+                    <img src="/Logo2.png" alt="Logo 2" className="object-cover w-full h-full rounded-lg" />
+                  </SwiperSlide>
+                  <SwiperSlide>
+                    <img src="/Logo3.png" alt="Logo 3" className="object-cover w-full h-full rounded-lg" />
+                  </SwiperSlide>
+                  <SwiperSlide>
+                    <img src="/logo512.png" alt="Logo 4" className="object-cover w-full h-full rounded-lg" />
+                  </SwiperSlide>
+                </Swiper>
               </div>
             </div>
           </div>
