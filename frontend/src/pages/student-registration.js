@@ -505,6 +505,40 @@ export default function StudentRegistrationPage() {
     }
   };
 
+  // Tambahkan komponen FileInput agar tampilan upload 
+  function FileInput({ id, name, value, onChange, disabled, onBlur, label, helperText, error }) {
+    return (
+      <div className="space-y-1">
+        <Label htmlFor={id}>{label}</Label>
+        <div className="flex items-center gap-2">
+          <input
+            id={id}
+            name={name}
+            type="file"
+            accept=".pdf"
+            onChange={onChange}
+            disabled={disabled}
+            onBlur={onBlur}
+            className="hidden"
+          />
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => document.getElementById(id)?.click()}
+            disabled={disabled}
+          >
+            Pilih File
+          </Button>
+          <span className="text-xs text-muted-foreground truncate max-w-xs">
+            {value ? value.name : 'Belum ada file dipilih'}
+          </span>
+        </div>
+        {helperText && <HelperText text={helperText} />}
+        {error && <ErrorMessage fieldName={name} />}
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-screen items-center justify-center p-6">
       {sudahAdaSiswa ? (
@@ -550,24 +584,39 @@ export default function StudentRegistrationPage() {
             <ErrorMessage fieldName="alamat" />
           </div>
           {/* Upload Dokumen */}
-          <div className="space-y-2">
-            <Label htmlFor="akte">Akte Kelahiran (PDF)</Label>
-            <Input id="akte" name="akte" type="file" accept=".pdf" onChange={handleDocumentChange} required disabled={isLoading} onBlur={() => handleFieldBlur('akte', documents.akte)} />
-            <HelperText text="Upload file PDF akte kelahiran siswa" />
-            <ErrorMessage fieldName="akte" />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="kk">Kartu Keluarga (PDF)</Label>
-            <Input id="kk" name="kk" type="file" accept=".pdf" onChange={handleDocumentChange} required disabled={isLoading} onBlur={() => handleFieldBlur('kk', documents.kk)} />
-            <HelperText text="Upload file PDF kartu keluarga" />
-            <ErrorMessage fieldName="kk" />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="rapor">Rapor (PDF)</Label>
-            <Input id="rapor" name="rapor" type="file" accept=".pdf" onChange={handleDocumentChange} required disabled={isLoading} onBlur={() => handleFieldBlur('rapor', documents.rapor)} />
-            <HelperText text="Upload file PDF rapor terakhir siswa" />
-            <ErrorMessage fieldName="rapor" />
-          </div>
+          <FileInput
+            id="akte"
+            name="akte"
+            value={documents.akte}
+            onChange={handleDocumentChange}
+            disabled={isLoading}
+            onBlur={() => handleFieldBlur('akte', documents.akte)}
+            label="Akte Kelahiran (PDF)"
+            helperText="Upload file PDF akte kelahiran siswa"
+            error={touchedFields.akte && fieldErrors.akte}
+          />
+          <FileInput
+            id="kk"
+            name="kk"
+            value={documents.kk}
+            onChange={handleDocumentChange}
+            disabled={isLoading}
+            onBlur={() => handleFieldBlur('kk', documents.kk)}
+            label="Kartu Keluarga (PDF)"
+            helperText="Upload file PDF kartu keluarga"
+            error={touchedFields.kk && fieldErrors.kk}
+          />
+          <FileInput
+            id="rapor"
+            name="rapor"
+            value={documents.rapor}
+            onChange={handleDocumentChange}
+            disabled={isLoading}
+            onBlur={() => handleFieldBlur('rapor', documents.rapor)}
+            label="Rapor (PDF)"
+            helperText="Upload file PDF rapor terakhir siswa"
+            error={touchedFields.rapor && fieldErrors.rapor}
+          />
           {/* Pilihan Program, Jalur, Tahun Ajaran */}
           <div className="space-y-2">
             <Label htmlFor="program">Program Sekolah</Label>

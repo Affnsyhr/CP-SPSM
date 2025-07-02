@@ -27,6 +27,9 @@ export default function DashboardPage() {
     totalDokumen: 0,
     jumlahNotifikasi: 0
   });
+  const [showNotif, setShowNotif] = useState(false);
+  const dropdownNotifRef = useRef(null);
+  const [notifikasi, setNotifikasi] = useState([]);
 
   // Ambil data user dari localStorage saat komponen dimount
   useEffect(() => {
@@ -52,6 +55,23 @@ export default function DashboardPage() {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  // Tutup dropdown notifikasi jika klik di luar
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownNotifRef.current && !dropdownNotifRef.current.contains(event.target)) {
+        setShowNotif(false);
+      }
+    }
+    if (showNotif) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showNotif]);
 
   const handleLogout = () => {
     // Hapus data user dan token dari localStorage
@@ -88,6 +108,7 @@ export default function DashboardPage() {
         const pendaftaran = Array.isArray(data.data.pendaftaran) ? data.data.pendaftaran : [];
         const dokumen = Array.isArray(data.data.dokumen) ? data.data.dokumen : [];
         const notifikasi = Array.isArray(data.data.notifikasi) ? data.data.notifikasi : [];
+        setNotifikasi(notifikasi);
         // Status pendaftaran terakhir (jika ada)
         let statusPendaftaran = '-';
         if (pendaftaran.length > 0) {
@@ -103,9 +124,11 @@ export default function DashboardPage() {
           jumlahNotifikasi: notifikasi.length
         });
       } else {
+        setNotifikasi([]);
         setKpi({ jumlahAnak: 0, statusPendaftaran: '-', dokumenTerverifikasi: 0, totalDokumen: 0, jumlahNotifikasi: 0 });
       }
     } catch (err) {
+      setNotifikasi([]);
       setKpi({ jumlahAnak: 0, statusPendaftaran: '-', dokumenTerverifikasi: 0, totalDokumen: 0, jumlahNotifikasi: 0 });
     } finally {
       setLoading(false);
@@ -115,6 +138,24 @@ export default function DashboardPage() {
   useEffect(() => {
     fetchKPI();
   }, []);
+
+  // Handler untuk menandai notifikasi sudah dibaca
+  const handleBacaNotifikasi = async (notifikasi_id, status_baca) => {
+    if (status_baca !== 'belum_dibaca') return;
+    try {
+      await fetch(`/api/notifikasi/${notifikasi_id}/baca`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      // Refresh notifikasi
+      fetchKPI();
+    } catch (err) {
+      // Optional: tampilkan error
+    }
+  };
 
   // Jika belum ada data user, tampilkan loading
   if (!userData) {
@@ -151,14 +192,53 @@ export default function DashboardPage() {
             <span className="text-lg font-semibold">Madrasah</span>
           </Link>
           <div className="ml-auto flex items-center gap-4">
-            <Button variant="outline" size="icon" className="relative">
+            <Button
+              variant="outline"
+              size="icon"
+              className="relative"
+              onClick={() => setShowNotif((prev) => !prev)}
+            >
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
                 <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
                 <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
               </svg>
               <span className="sr-only">Notifications</span>
-              <span className="absolute right-1 top-1 flex h-2 w-2 rounded-full bg-primary"></span>
+              {kpi.jumlahNotifikasi > 0 && (
+                <span className="absolute right-1 top-1 flex h-2 w-2 rounded-full bg-primary"></span>
+              )}
             </Button>
+            {showNotif && (
+              <div
+                ref={dropdownNotifRef}
+                className="absolute right-0 mt-2 w-80 rounded-md border bg-white shadow-lg z-50"
+                style={{ top: '3rem' }}
+              >
+                <div className="p-4 font-semibold border-b">Notifikasi</div>
+                <ul className="max-h-64 overflow-y-auto">
+                  {notifikasi.length === 0 ? (
+                    <li className="p-4 text-sm text-muted-foreground">Tidak ada notifikasi baru.</li>
+                  ) : (
+                    notifikasi.map((notif, idx) => {
+                      const notifId = notif.notif_id;
+                      return (
+                        <li
+                          key={idx}
+                          className={`p-4 border-b last:border-b-0 cursor-pointer ${notif.status_baca === 'belum_dibaca' ? 'bg-yellow-50' : ''}`}
+                          onClick={() => handleBacaNotifikasi(notifId, notif.status_baca)}
+                        >
+                          <div className="font-medium">{notif.judul}</div>
+                          <div className="text-xs text-muted-foreground whitespace-pre-line">{notif.isi}</div>
+                          <div className="text-xs text-gray-400 mt-1">{notif.tanggal_kirim ? new Date(notif.tanggal_kirim).toLocaleString() : ''}</div>
+                          {notif.status_baca === 'belum_dibaca' && (
+                            <span className="inline-block ml-2 px-2 py-0.5 text-xs bg-yellow-200 text-yellow-800 rounded">Baru</span>
+                          )}
+                        </li>
+                      );
+                    })
+                  )}
+                </ul>
+              </div>
+            )}
             <div className="relative" ref={dropdownRef}>
               <Button 
                 variant="outline" 
