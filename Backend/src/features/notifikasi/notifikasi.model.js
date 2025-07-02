@@ -10,6 +10,15 @@ const createNotifikasi = async ({ penerima_id, judul, isi, jenis_notif }) => {
   return result.rows[0];
 };
 
+const updateStatusBaca = async (notifikasi_id) => {
+  const result = await db.query(
+    `UPDATE notifikasi SET status_baca = 'sudah_dibaca' WHERE notifikasi_id = $1 RETURNING *`,
+    [notifikasi_id]
+  );
+  return result.rows[0];
+};
+
 module.exports = {
   createNotifikasi,
+  updateStatusBaca,
 };

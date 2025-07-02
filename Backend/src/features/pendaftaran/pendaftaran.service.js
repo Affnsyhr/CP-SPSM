@@ -70,28 +70,42 @@ const updateStatusPendaftaran = async (id, status_pendaftaran) => {
     }
   }
 
-  // Kirim email jika lulus (DISABLED SEMENTARA)
-  /*
+  // Kirim email & notifikasi jika lulus
   if (status_pendaftaran === 'lulus') {
-    // Ambil data orang tua dan anak
-    const result = await db.query(`
-      SELECT u.email, ot.nama_lengkap AS nama_ortu, s.nama_lengkap AS nama_anak
-      FROM data_pendaftaran dp
-      JOIN orang_tua ot ON dp.orang_tua_id = ot.user_id
-      JOIN users u ON ot.user_id = u.user_id
-      JOIN siswa s ON dp.siswa_id = s.siswa_id
-      WHERE dp.pendaftaran_id = $1
-    `, [id]);
-    if (result.rows.length) {
-      const { email, nama_ortu, nama_anak } = result.rows[0];
-      await sendEmail({
-        to: email,
-        subject: 'Pendaftaran Diterima',
-        text: `Yth. Bapak/Ibu ${nama_ortu},\nSelamat! Pendaftaran anak Anda atas nama ${nama_anak} telah diterima di sekolah kami.\nSilakan cek dashboard untuk informasi selanjutnya.`
-      });
+    try {
+      // Ambil data orang tua dan anak
+      const result = await db.query(`
+        SELECT u.email, ot.nama_lengkap AS nama_ortu, s.nama_lengkap AS nama_anak, ot.user_id as orang_tua_id
+        FROM data_pendaftaran dp
+        JOIN orang_tua ot ON dp.orang_tua_id = ot.user_id
+        JOIN users u ON ot.user_id = u.user_id
+        JOIN siswa s ON dp.siswa_id = s.siswa_id
+        WHERE dp.pendaftaran_id = $1
+      `, [id]);
+      if (result.rows.length) {
+        const { email, nama_ortu, nama_anak, orang_tua_id } = result.rows[0];
+        // Kirim email
+        await sendEmail({
+          to: email,
+          subject: 'Pendaftaran Diterima',
+          text: `Yth. Bapak/Ibu ${nama_ortu},\nSelamat! Pendaftaran anak Anda atas nama ${nama_anak} telah diterima di sekolah kami.\nSilakan cek dashboard untuk informasi selanjutnya.`
+        });
+        // Kirim notifikasi aplikasi
+        const NotifikasiService = require('../notifikasi/notifikasi.service');
+        await NotifikasiService.kirimNotifikasi({
+          penerima_id: orang_tua_id,
+          judul: 'Pendaftaran Diterima',
+          isi: `Selamat! Pendaftaran anak Anda atas nama ${nama_anak} telah diterima di sekolah kami. Silakan cek dashboard untuk informasi selanjutnya.`,
+          jenis_notif: 'pendaftaran'
+        });
+      } else {
+        console.warn('Email/orangtua tidak ditemukan untuk pendaftaran_id:', id);
+      }
+    } catch (err) {
+      console.error('Gagal mengirim email/notifikasi kelulusan:', err);
     }
   }
-  */
+  
   return updatedPendaftaran;
 };
 

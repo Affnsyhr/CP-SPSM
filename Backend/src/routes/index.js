@@ -11,6 +11,7 @@ const programRoutes = require('../features/program/program.routes');
 const timelineRoutes = require('../features/timeline/timeline.routes');
 const tahunAjaranRoutes = require('../features/tahunajaran/tahunajaran.routes');
 const headmasterRoutes = require('../features/headmaster/headmaster.routes');
+const notifikasiService = require('../features/notifikasi/notifikasi.service');
 const router = express.Router();
 
 // API Routes
@@ -26,6 +27,7 @@ router.use('/program', programRoutes);
 router.use('/timeline', timelineRoutes);
 router.use('/tahunajaran', tahunAjaranRoutes);
 router.use('/headmaster', headmasterRoutes);
+router.patch('/api/notifikasi/:notifikasi_id/baca', notifikasiService.updateStatusBacaController);
 // Health check endpoint
 router.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'Server is running' });
