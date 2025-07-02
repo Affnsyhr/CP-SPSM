@@ -1,0 +1,20 @@
+# Abaikan folder node_modules
+Backend/node_modules/
+
+# Abaikan folder logs 
+Backend/logs/
+
+# Abaikan folder uploads 
+Backend/uploads/
+
+# node_modules di dalam frontend (sama seperti di Backend)
+frontend/node_modules/
+
+# Abaikan folder build 
+frontend/build/
+
+# Abaikan semua file .env di seluruh project 
+*.env
+
+# Abaikan semua file log di seluruh project 
+*.log
