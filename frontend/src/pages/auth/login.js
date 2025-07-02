@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../../components/ui/button";
 import { useToast } from "../../hooks/use-toast";
+import apiService from "../../services/api";
 
 export default function Login() {
   const { toast } = useToast();
@@ -9,73 +10,51 @@ export default function Login() {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-    role: "admin", // default role
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
+    
     try {
-      // Simulasi login dengan kredensial yang berbeda
-      if (formData.role === "headmaster" && 
-          formData.email === "headmaster@madrasah.id" && 
-          formData.password === "headmaster123") {
-        // Login sebagai kepala sekolah
-        localStorage.setItem("user", JSON.stringify({
-          id: 1,
-          name: "Kepala Sekolah",
-          email: formData.email,
-          role: "headmaster"
-        }));
+      const data = await apiService.login(formData);
+
+      if (data.status === 'success') {
+        // Simpan token dan data user
+        localStorage.setItem('token', data.data.token);
+        localStorage.setItem('user', JSON.stringify(data.data.user));
         
         toast({
           title: "Login Berhasil",
-          description: "Selamat datang di dashboard kepala sekolah",
+          description: `Selamat datang, ${data.data.user.nama_lengkap || data.data.user.username}!`,
         });
-        
-        navigate("/dashboard"); // Menggunakan path yang sama seperti admin
-      } else if (formData.role === "admin" && 
-                 formData.email === "admin@madrasah.id" && 
-                 formData.password === "admin123") {
-        // Login sebagai admin
-        localStorage.setItem("user", JSON.stringify({
-          id: 1,
-          name: "Admin",
-          email: formData.email,
-          role: "admin"
-        }));
-        
-        toast({
-          title: "Login Berhasil",
-          description: "Selamat datang di dashboard admin",
-        });
-        
-        navigate("/dashboard");
-      } else if (formData.role === "superadmin" && 
-                 formData.email === "superadmin@madrasah.id" && 
-                 formData.password === "superadmin123") {
-        // Login sebagai superadmin
-        localStorage.setItem("user", JSON.stringify({
-          id: 1,
-          name: "Super Admin",
-          email: formData.email,
-          role: "superadmin"
-        }));
-        
-        toast({
-          title: "Login Berhasil",
-          description: "Selamat datang di dashboard super admin",
-        });
-        
-        navigate("/dashboard");
+
+        // Redirect berdasarkan role
+        const role = data.data.user.role;
+        if (role === 'superadmin') {
+          navigate("/super-admin/dashboard");
+        } else if (role === 'admin') {
+          navigate("/admin/dashboard");
+        } else if (role === 'headmaster') {
+          navigate("/headmaster/dashboard");
+        } else if (role === 'orang_tua') {
+          navigate("/wali-siswa/dashboard");
+        } else {
+          navigate("/dashboard");
+        }
       } else {
-        throw new Error("Email atau password salah");
+        throw new Error(data.message || 'Login gagal');
       }
     } catch (error) {
+      console.error('Login error:', error);
       toast({
         title: "Login Gagal",
-        description: error.message,
+        description: error.message || "Terjadi kesalahan saat login",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -87,27 +66,11 @@ export default function Login() {
             Login ke Akun Anda
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Masuk ke dashboard admin atau kepala sekolah
+            Masuk ke sistem pendaftaran siswa
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm space-y-4">
-            <div>
-              <label htmlFor="role" className="block text-sm font-medium text-gray-700">
-                Login Sebagai
-              </label>
-              <select
-                id="role"
-                name="role"
-                className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-                value={formData.role}
-                onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-              >
-                <option value="admin">Admin</option>
-                <option value="headmaster">Kepala Sekolah</option>
-                <option value="superadmin">Super Admin</option>
-              </select>
-            </div>
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                 Email
@@ -118,7 +81,7 @@ export default function Login() {
                 type="email"
                 required
                 className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Email"
+                placeholder="Masukkan email Anda"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               />
@@ -133,7 +96,7 @@ export default function Login() {
                 type="password"
                 required
                 className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Password"
+                placeholder="Masukkan password Anda"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               />
@@ -143,10 +106,17 @@ export default function Login() {
           <div>
             <Button
               type="submit"
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              disabled={isLoading}
+              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
             >
-              Login
+              {isLoading ? "Loading..." : "Login"}
             </Button>
+          </div>
+          
+          <div className="text-center">
+            <Link to="/register" className="text-sm text-indigo-600 hover:text-indigo-500">
+              Belum punya akun? Daftar disini
+            </Link>
           </div>
         </form>
       </div>
