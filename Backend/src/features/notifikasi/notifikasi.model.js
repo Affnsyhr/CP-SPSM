@@ -10,10 +10,10 @@ const createNotifikasi = async ({ penerima_id, judul, isi, jenis_notif }) => {
   return result.rows[0];
 };
 
-const updateStatusBaca = async (notifikasi_id) => {
+const updateStatusBaca = async (notif_id) => {
   const result = await db.query(
-    `UPDATE notifikasi SET status_baca = 'sudah_dibaca' WHERE notifikasi_id = $1 RETURNING *`,
-    [notifikasi_id]
+    `UPDATE notifikasi SET status_baca = 'terbaca' WHERE notif_id = $1 RETURNING *`,
+    [notif_id]
   );
   return result.rows[0];
 };

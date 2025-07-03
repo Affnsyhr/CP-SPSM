@@ -9,8 +9,8 @@ const kirimNotifikasi = async ({ penerima_id, judul, isi, jenis_notif }) => {
   });
 };
 
-const updateStatusBaca = async (notifikasi_id) => {
-  return await NotifikasiModel.updateStatusBaca(notifikasi_id);
+const updateStatusBaca = async (notif_id) => {
+  return await NotifikasiModel.updateStatusBaca(notif_id);
 };
 
 // Controller untuk update status_baca notifikasi

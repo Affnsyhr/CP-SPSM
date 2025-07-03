@@ -27,7 +27,7 @@ router.use('/program', programRoutes);
 router.use('/timeline', timelineRoutes);
 router.use('/tahunajaran', tahunAjaranRoutes);
 router.use('/headmaster', headmasterRoutes);
-router.patch('/api/notifikasi/:notifikasi_id/baca', notifikasiService.updateStatusBacaController);
+router.patch('/notifikasi/:notifikasi_id/baca', notifikasiService.updateStatusBacaController);
 // Health check endpoint
 router.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'Server is running' });
