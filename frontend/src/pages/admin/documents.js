@@ -41,6 +41,7 @@ export default function AdminDocuments() {
           id: doc.dokumen_id,
           studentName: doc.nama_siswa,
           documentType: mapJenisDokumen(doc.jenis_dokumen),
+          rawJenisDokumen: doc.jenis_dokumen,
           status: mapStatusVerifikasi(doc.status_verifikasi),
           uploadDate: doc.tanggal_upload ? new Date(doc.tanggal_upload).toLocaleDateString() : '',
           fileUrl: `/uploads/dokumen/${doc.nama_file}`,
@@ -142,7 +143,25 @@ export default function AdminDocuments() {
 
   const filteredDocuments = documents.filter(doc => {
     const matchesSearch = doc.studentName.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesType = !documentType || doc.documentType === documentType;
+    let matchesType = !documentType || doc.documentType === documentType;
+
+    // Jika filter 'Rapor', sertakan juga dokumen enum 'lainnya' yang mengandung kata 'rapor' di notes atau fileUrl
+    if (
+      documentType === 'Rapor' &&
+      doc.rawJenisDokumen === 'lainnya' &&
+      (
+        (doc.notes && doc.notes.toLowerCase().includes('rapor')) ||
+        (doc.fileUrl && doc.fileUrl.toLowerCase().includes('rapor'))
+      )
+    ) {
+      matchesType = true;
+    }
+
+    // Jika filter 'lainnya', tampilkan semua enum 'lainnya' (termasuk yang mengandung kata 'rapor')
+    if (documentType === 'lainnya' && doc.rawJenisDokumen === 'lainnya') {
+      matchesType = true;
+    }
+
     return matchesSearch && matchesType;
   });
 
@@ -181,6 +200,7 @@ export default function AdminDocuments() {
                     <option value="Rapor">Rapor</option>
                     <option value="Ijazah">Ijazah</option>
                     <option value="Foto">Foto</option>
+                    <option value="lainnya">Lainnya</option>
                   </select>
                 </div>
               </div>
@@ -205,7 +225,11 @@ export default function AdminDocuments() {
                   {filteredDocuments.map((doc) => (
                     <tr key={doc.id} className="border-b">
                       <td className="p-4">{doc.studentName}</td>
-                      <td className="p-4">{doc.documentType}</td>
+                      <td className="p-4">
+                        {documentType === 'Rapor' && doc.rawJenisDokumen === 'lainnya'
+                          ? 'Rapor'
+                          : doc.documentType}
+                      </td>
                       <td className="p-4">
                         <span className={`rounded-full px-2 py-1 text-xs ${
                           doc.status === "verified" 

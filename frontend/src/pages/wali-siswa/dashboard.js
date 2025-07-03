@@ -30,6 +30,8 @@ export default function DashboardPage() {
   const [showNotif, setShowNotif] = useState(false);
   const dropdownNotifRef = useRef(null);
   const [notifikasi, setNotifikasi] = useState([]);
+  const [selectedNotif, setSelectedNotif] = useState(null);
+  const [showNotifDetail, setShowNotifDetail] = useState(false);
 
   // Ambil data user dari localStorage saat komponen dimount
   useEffect(() => {
@@ -157,6 +159,23 @@ export default function DashboardPage() {
     }
   };
 
+  const handleOpenNotifDetail = async (notif) => {
+    setSelectedNotif(notif);
+    setShowNotifDetail(true);
+    if (notif.status_baca === 'belum_dibaca') {
+      try {
+        await fetch(`/api/notifikasi/${notif.notif_id}/baca`, {
+          method: 'PATCH',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        fetchKPI();
+      } catch (err) {}
+    }
+  };
+
   // Jika belum ada data user, tampilkan loading
   if (!userData) {
     return (
@@ -219,12 +238,11 @@ export default function DashboardPage() {
                     <li className="p-4 text-sm text-muted-foreground">Tidak ada notifikasi baru.</li>
                   ) : (
                     notifikasi.map((notif, idx) => {
-                      const notifId = notif.notif_id;
                       return (
                         <li
                           key={idx}
                           className={`p-4 border-b last:border-b-0 cursor-pointer ${notif.status_baca === 'belum_dibaca' ? 'bg-yellow-50' : ''}`}
-                          onClick={() => handleBacaNotifikasi(notifId, notif.status_baca)}
+                          onClick={() => handleOpenNotifDetail(notif)}
                         >
                           <div className="font-medium">{notif.judul}</div>
                           <div className="text-xs text-muted-foreground whitespace-pre-line">{notif.isi}</div>
@@ -298,6 +316,26 @@ export default function DashboardPage() {
               <Button variant="destructive" onClick={handleLogout}>
                 Ya
               </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Modal detail notifikasi */}
+        <Dialog open={showNotifDetail} onOpenChange={setShowNotifDetail}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Detail Notifikasi</DialogTitle>
+            </DialogHeader>
+            {selectedNotif && (
+              <div className="space-y-2">
+                <div className="font-semibold text-lg">{selectedNotif.judul}</div>
+                <div className="text-sm whitespace-pre-line">{selectedNotif.isi}</div>
+                <div className="text-xs text-gray-400">{selectedNotif.tanggal_kirim ? new Date(selectedNotif.tanggal_kirim).toLocaleString() : ''}</div>
+                <div className="text-xs">Status: {selectedNotif.status_baca === 'terbaca' ? 'Terbaca' : 'Belum Dibaca'}</div>
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowNotifDetail(false)}>Tutup</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

@@ -40,8 +40,6 @@ import { Sidebar } from "../../components/layout/sidebar";
 
 export default function ParentAccounts() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [programFilter, setProgramFilter] = useState("all");
-  const [pathFilter, setPathFilter] = useState("all");
   const [isEditing, setIsEditing] = useState(false);
   const [selectedParent, setSelectedParent] = useState(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -164,14 +162,6 @@ export default function ParentAccounts() {
     }
   };
 
-  const handleExportData = () => {
-    // Implementasi ekspor data ke Excel/PDF
-    toast({
-      title: "Data berhasil diekspor",
-      description: "Data wali murid telah diekspor ke Excel",
-    });
-  };
-
   // Tambah fungsi untuk aktif/nonaktif akun
   const handleToggleActive = async (parent) => {
     const isActive = parent.is_active !== false; // default true jika undefined
@@ -194,13 +184,10 @@ export default function ParentAccounts() {
   };
 
   const filteredParents = parents.filter(parent => {
-    const matchesSearch = 
+    return (
       parent.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      parent.email.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesProgram = programFilter === "all" || parent.program === programFilter;
-    const matchesPath = pathFilter === "all" || parent.path === pathFilter;
-    
-    return matchesSearch && matchesProgram && matchesPath;
+      parent.email.toLowerCase().includes(searchQuery.toLowerCase())
+    );
   });
 
   return (
@@ -224,47 +211,6 @@ export default function ParentAccounts() {
                 className="max-w-sm"
               />
             </div>
-            <Select value={programFilter} onValueChange={setProgramFilter}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Program" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Semua Program</SelectItem>
-                <SelectItem value="boarding">Boarding School</SelectItem>
-                <SelectItem value="fullDay">Full Day School</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={pathFilter} onValueChange={setPathFilter}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Jalur" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Semua Jalur</SelectItem>
-                <SelectItem value="reguler">Reguler</SelectItem>
-                <SelectItem value="prestasiAkademik">Prestasi Akademik</SelectItem>
-                <SelectItem value="prestasiNonAkademik">Prestasi Non Akademik</SelectItem>
-                <SelectItem value="tahfizh">Tahfizh</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button onClick={handleExportData}>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="mr-2 h-4 w-4"
-              >
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                <polyline points="7 10 12 15 17 10" />
-                <line x1="12" y1="15" x2="12" y2="3" />
-              </svg>
-              Ekspor Data
-            </Button>
           </div>
 
           <div className="rounded-lg border">

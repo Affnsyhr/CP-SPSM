@@ -15,6 +15,7 @@ export default function AdminManageRegistrations() {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [statusFilter, setStatusFilter] = useState("");
 
   useEffect(() => {
     const fetchRegistrations = async () => {
@@ -45,6 +46,10 @@ export default function AdminManageRegistrations() {
     setShowDetailDialog(true);
   };
 
+  const filteredStudents = statusFilter
+    ? students.filter(s => s.status_pendaftaran === statusFilter)
+    : students;
+
   return (
     <div className="flex min-h-screen">
       <Sidebar />
@@ -68,14 +73,17 @@ export default function AdminManageRegistrations() {
                     placeholder="Cari pendaftar..."
                     className="h-10 rounded-md border px-4"
                   />
-                  <select className="h-10 rounded-md border px-4">
+                  <select
+                    className="h-10 rounded-md border px-4"
+                    value={statusFilter}
+                    onChange={e => setStatusFilter(e.target.value)}
+                  >
                     <option value="">Semua Status</option>
                     <option value="proses">Menunggu Verifikasi</option>
                     <option value="lulus">Terverifikasi</option>
                     <option value="tidak_lulus">Ditolak</option>
                   </select>
                 </div>
-                <Button>Filter</Button>
               </div>
             </div>
             
@@ -96,7 +104,7 @@ export default function AdminManageRegistrations() {
                     </tr>
                   </thead>
                   <tbody>
-                    {students.map((student) => (
+                    {filteredStudents.map((student) => (
                       <tr key={student.pendaftaran_id} className="border-b">
                         <td className="p-4">{student.nama_siswa}</td>
                         <td className="p-4">{student.email_orangtua}</td>

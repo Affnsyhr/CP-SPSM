@@ -22,12 +22,9 @@ export default function ActivityLogs() {
   const { toast } = useToast();
   const [showDetailDialog, setShowDetailDialog] = useState(false);
   const [selectedLog, setSelectedLog] = useState(null);
-  const [exportFormat, setExportFormat] = useState("csv");
   const [loading, setLoading] = useState(true);
   const [logs, setLogs] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterUser, setFilterUser] = useState("all");
-  const [filterActivity, setFilterActivity] = useState("all");
 
   // Get auth token
   const getAuthToken = () => {
@@ -72,30 +69,11 @@ export default function ActivityLogs() {
     setShowDetailDialog(true);
   };
 
-  const handleExport = () => {
-    // Implement export functionality
-    console.log(`Exporting to ${exportFormat}...`);
-    toast({
-      title: "Info",
-      description: `Fitur ekspor ke ${exportFormat} akan segera tersedia`,
-    });
-  };
-
-  // Filter logs based on search and filters
+  // Filter logs based on search
   const filteredLogs = logs.filter(log => {
-    const matchesSearch = searchQuery === "" || 
+    return searchQuery === "" || 
       log.aktivitas?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       log.username?.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesUser = filterUser === "all" || 
-      (filterUser === "admin" && log.role_id === 3) ||
-      (filterUser === "headmaster" && log.role_id === 4) ||
-      (filterUser === "parent" && log.role_id === 2);
-    
-    const matchesActivity = filterActivity === "all" || 
-      log.aktivitas?.toLowerCase().includes(filterActivity.toLowerCase());
-    
-    return matchesSearch && matchesUser && matchesActivity;
   });
 
   // Get role name from role_id
@@ -158,41 +136,6 @@ export default function ActivityLogs() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
-              </div>
-              <Select value={filterUser} onValueChange={setFilterUser}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Filter User" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Semua User</SelectItem>
-                  <SelectItem value="admin">Admin TU</SelectItem>
-                  <SelectItem value="headmaster">Kepala Sekolah</SelectItem>
-                  <SelectItem value="parent">Orang Tua</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={filterActivity} onValueChange={setFilterActivity}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Jenis Aktivitas" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Semua Aktivitas</SelectItem>
-                  <SelectItem value="login">Login/Logout</SelectItem>
-                  <SelectItem value="crud">CRUD Data</SelectItem>
-                  <SelectItem value="verify">Verifikasi</SelectItem>
-                  <SelectItem value="status">Perubahan Status</SelectItem>
-                </SelectContent>
-              </Select>
-              <div className="flex items-center gap-2">
-                <Select value={exportFormat} onValueChange={setExportFormat}>
-                  <SelectTrigger className="w-[120px]">
-                    <SelectValue placeholder="Format" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="csv">CSV</SelectItem>
-                    <SelectItem value="pdf">PDF</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Button onClick={handleExport}>Ekspor</Button>
               </div>
             </div>
           </div>
