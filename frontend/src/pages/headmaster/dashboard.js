@@ -143,31 +143,32 @@ function HeadmasterDashboard() {
   };
 
   // Prepare chart data dari API
+  const statusColorMap = {
+    'proses': 'rgba(234, 179, 8, 0.8)',      // Kuning untuk menunggu verifikasi
+    'lulus': 'rgba(34, 197, 94, 0.8)',      // Hijau untuk diterima
+    'tidak_lulus': 'rgba(239, 68, 68, 0.8)',// Merah untuk ditolak
+    'cadangan': 'rgba(59, 130, 246, 0.8)',  // Biru untuk cadangan
+  };
+  const statusBorderColorMap = {
+    'proses': 'rgb(234, 179, 8)',
+    'lulus': 'rgb(34, 197, 94)',
+    'tidak_lulus': 'rgb(239, 68, 68)',
+    'cadangan': 'rgb(59, 130, 246)',
+  };
+  const statusLabelMap = {
+    'proses': 'Menunggu Verifikasi',
+    'lulus': 'Diterima',
+    'tidak_lulus': 'Ditolak',
+    'cadangan': 'Cadangan',
+  };
+
   const statusData = chartData.statusChart ? {
-    labels: chartData.statusChart.map(item => {
-      const statusMap = {
-        'proses': 'Menunggu Verifikasi',
-        'lulus': 'Diterima',
-        'tidak_lulus': 'Ditolak',
-        'cadangan': 'Cadangan'
-      };
-      return statusMap[item.status_pendaftaran] || item.status_pendaftaran;
-    }),
+    labels: chartData.statusChart.map(item => statusLabelMap[item.status_pendaftaran] || item.status_pendaftaran),
     datasets: [
       {
         data: chartData.statusChart.map(item => item.total),
-        backgroundColor: [
-          'rgba(234, 179, 8, 0.8)',  // Kuning untuk menunggu
-          'rgba(34, 197, 94, 0.8)',  // Hijau untuk diterima
-          'rgba(239, 68, 68, 0.8)',  // Merah untuk ditolak
-          'rgba(59, 130, 246, 0.8)', // Biru untuk cadangan
-        ],
-        borderColor: [
-          'rgb(234, 179, 8)',
-          'rgb(34, 197, 94)',
-          'rgb(239, 68, 68)',
-          'rgb(59, 130, 246)',
-        ],
+        backgroundColor: chartData.statusChart.map(item => statusColorMap[item.status_pendaftaran] || 'rgba(156, 163, 175, 0.8)'),
+        borderColor: chartData.statusChart.map(item => statusBorderColorMap[item.status_pendaftaran] || 'rgb(156, 163, 175)'),
         borderWidth: 1,
       },
     ],
